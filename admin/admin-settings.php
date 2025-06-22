@@ -25,37 +25,102 @@ if (isset($_POST['submit']) && check_admin_referer('acb_settings_nonce')) {
         'link_url' => esc_url_raw($_POST['acb_options']['link_url']),
         'speech_bubble_enabled' => isset($_POST['acb_options']['speech_bubble_enabled']) ? true : false,
         'speech_bubble_frequency' => max(1, min(5, intval($_POST['acb_options']['speech_bubble_frequency']))),
-        // カスタムメッセージ設定
+        // カスタムメッセージ設定（25文字制限）
         'custom_messages' => array(
             'morning' => array(
                 'greeting' => isset($_POST['acb_options']['custom_messages']['morning']['greeting']) ? 
-                    array_map('sanitize_text_field', array_filter(explode("\n", $_POST['acb_options']['custom_messages']['morning']['greeting']))) : array(),
+                    array_map(function($msg) { 
+                        $sanitized = sanitize_text_field($msg);
+                        if (mb_strlen($sanitized) > 25) {
+                            add_settings_error('acb_options', 'message_too_long', '朝の挨拶メッセージで25文字を超えるものがあります。', 'error');
+                            return mb_substr($sanitized, 0, 25);
+                        }
+                        return $sanitized;
+                    }, array_filter(explode("\n", $_POST['acb_options']['custom_messages']['morning']['greeting']))) : array(),
                 'cta' => isset($_POST['acb_options']['custom_messages']['morning']['cta']) ? 
-                    array_map('sanitize_text_field', array_filter(explode("\n", $_POST['acb_options']['custom_messages']['morning']['cta']))) : array()
+                    array_map(function($msg) { 
+                        $sanitized = sanitize_text_field($msg);
+                        if (mb_strlen($sanitized) > 25) {
+                            add_settings_error('acb_options', 'message_too_long', '朝のCTAメッセージで25文字を超えるものがあります。', 'error');
+                            return mb_substr($sanitized, 0, 25);
+                        }
+                        return $sanitized;
+                    }, array_filter(explode("\n", $_POST['acb_options']['custom_messages']['morning']['cta']))) : array()
             ),
             'afternoon' => array(
                 'greeting' => isset($_POST['acb_options']['custom_messages']['afternoon']['greeting']) ? 
-                    array_map('sanitize_text_field', array_filter(explode("\n", $_POST['acb_options']['custom_messages']['afternoon']['greeting']))) : array(),
+                    array_map(function($msg) { 
+                        $sanitized = sanitize_text_field($msg);
+                        if (mb_strlen($sanitized) > 25) {
+                            add_settings_error('acb_options', 'message_too_long', '昼の挨拶メッセージで25文字を超えるものがあります。', 'error');
+                            return mb_substr($sanitized, 0, 25);
+                        }
+                        return $sanitized;
+                    }, array_filter(explode("\n", $_POST['acb_options']['custom_messages']['afternoon']['greeting']))) : array(),
                 'cta' => isset($_POST['acb_options']['custom_messages']['afternoon']['cta']) ? 
-                    array_map('sanitize_text_field', array_filter(explode("\n", $_POST['acb_options']['custom_messages']['afternoon']['cta']))) : array()
+                    array_map(function($msg) { 
+                        $sanitized = sanitize_text_field($msg);
+                        if (mb_strlen($sanitized) > 25) {
+                            add_settings_error('acb_options', 'message_too_long', '昼のCTAメッセージで25文字を超えるものがあります。', 'error');
+                            return mb_substr($sanitized, 0, 25);
+                        }
+                        return $sanitized;
+                    }, array_filter(explode("\n", $_POST['acb_options']['custom_messages']['afternoon']['cta']))) : array()
             ),
             'evening' => array(
                 'greeting' => isset($_POST['acb_options']['custom_messages']['evening']['greeting']) ? 
-                    array_map('sanitize_text_field', array_filter(explode("\n", $_POST['acb_options']['custom_messages']['evening']['greeting']))) : array(),
+                    array_map(function($msg) { 
+                        $sanitized = sanitize_text_field($msg);
+                        if (mb_strlen($sanitized) > 25) {
+                            add_settings_error('acb_options', 'message_too_long', '夕方の挨拶メッセージで25文字を超えるものがあります。', 'error');
+                            return mb_substr($sanitized, 0, 25);
+                        }
+                        return $sanitized;
+                    }, array_filter(explode("\n", $_POST['acb_options']['custom_messages']['evening']['greeting']))) : array(),
                 'cta' => isset($_POST['acb_options']['custom_messages']['evening']['cta']) ? 
-                    array_map('sanitize_text_field', array_filter(explode("\n", $_POST['acb_options']['custom_messages']['evening']['cta']))) : array()
+                    array_map(function($msg) { 
+                        $sanitized = sanitize_text_field($msg);
+                        if (mb_strlen($sanitized) > 25) {
+                            add_settings_error('acb_options', 'message_too_long', '夕方のCTAメッセージで25文字を超えるものがあります。', 'error');
+                            return mb_substr($sanitized, 0, 25);
+                        }
+                        return $sanitized;
+                    }, array_filter(explode("\n", $_POST['acb_options']['custom_messages']['evening']['cta']))) : array()
             ),
             'night' => array(
                 'greeting' => isset($_POST['acb_options']['custom_messages']['night']['greeting']) ? 
-                    array_map('sanitize_text_field', array_filter(explode("\n", $_POST['acb_options']['custom_messages']['night']['greeting']))) : array(),
+                    array_map(function($msg) { 
+                        $sanitized = sanitize_text_field($msg);
+                        if (mb_strlen($sanitized) > 25) {
+                            add_settings_error('acb_options', 'message_too_long', '夜の挨拶メッセージで25文字を超えるものがあります。', 'error');
+                            return mb_substr($sanitized, 0, 25);
+                        }
+                        return $sanitized;
+                    }, array_filter(explode("\n", $_POST['acb_options']['custom_messages']['night']['greeting']))) : array(),
                 'cta' => isset($_POST['acb_options']['custom_messages']['night']['cta']) ? 
-                    array_map('sanitize_text_field', array_filter(explode("\n", $_POST['acb_options']['custom_messages']['night']['cta']))) : array()
+                    array_map(function($msg) { 
+                        $sanitized = sanitize_text_field($msg);
+                        if (mb_strlen($sanitized) > 25) {
+                            add_settings_error('acb_options', 'message_too_long', '夜のCTAメッセージで25文字を超えるものがあります。', 'error');
+                            return mb_substr($sanitized, 0, 25);
+                        }
+                        return $sanitized;
+                    }, array_filter(explode("\n", $_POST['acb_options']['custom_messages']['night']['cta']))) : array()
             )
         )
     );
     
     update_option('acb_options', $new_options);
-    echo '<div class="notice notice-success"><p>設定を保存しました。</p></div>';
+    
+    // エラーがない場合のみ成功メッセージを表示
+    $errors = get_settings_errors('acb_options');
+    if (empty($errors)) {
+        echo '<div class="notice notice-success"><p>設定を保存しました。</p></div>';
+    } else {
+        foreach ($errors as $error) {
+            echo '<div class="notice notice-error"><p>' . esc_html($error['message']) . ' 25文字以内に修正して再保存してください。</p></div>';
+        }
+    }
 }
 
 $options = get_option('acb_options', array());
@@ -292,7 +357,8 @@ $custom_messages = isset($options['custom_messages']) ? $options['custom_message
                                               name="acb_options[custom_messages][morning][greeting]" 
                                               rows="3" 
                                               style="width: 100%; max-width: 500px;"
-                                              placeholder="例: おはようございます☀️&#10;素敵な一日の始まりですね&#10;今日も頑張りましょう✨"><?php 
+                                              placeholder="例: おはようございます☀️&#10;素敵な一日の始まりですね&#10;今日も頑張りましょう✨"
+                                              data-char-limit="25"><?php 
                                         echo esc_textarea(implode("\n", isset($custom_messages['morning']['greeting']) ? $custom_messages['morning']['greeting'] : $default_messages['morning']['greeting']));
                                     ?></textarea>
                                 </div>
@@ -302,7 +368,8 @@ $custom_messages = isset($options['custom_messages']) ? $options['custom_message
                                               name="acb_options[custom_messages][morning][cta]" 
                                               rows="3" 
                                               style="width: 100%; max-width: 500px;"
-                                              placeholder="例: お得な商品をチェック！&#10;新商品が入荷しています&#10;朝の特別セールあります"><?php 
+                                              placeholder="例: お得な商品をチェック！&#10;新商品が入荷しています&#10;朝の特別セールあります"
+                                              data-char-limit="25"><?php 
                                         echo esc_textarea(implode("\n", isset($custom_messages['morning']['cta']) ? $custom_messages['morning']['cta'] : $default_messages['morning']['cta']));
                                     ?></textarea>
                                 </div>
@@ -321,7 +388,8 @@ $custom_messages = isset($options['custom_messages']) ? $options['custom_message
                                               name="acb_options[custom_messages][afternoon][greeting]" 
                                               rows="3" 
                                               style="width: 100%; max-width: 500px;"
-                                              placeholder="例: こんにちは😊&#10;お疲れ様です&#10;午後もお疲れ様"><?php 
+                                              placeholder="例: こんにちは😊&#10;お疲れ様です&#10;午後もお疲れ様"
+                                              data-char-limit="25"><?php 
                                         echo esc_textarea(implode("\n", isset($custom_messages['afternoon']['greeting']) ? $custom_messages['afternoon']['greeting'] : $default_messages['afternoon']['greeting']));
                                     ?></textarea>
                                 </div>
@@ -331,7 +399,8 @@ $custom_messages = isset($options['custom_messages']) ? $options['custom_message
                                               name="acb_options[custom_messages][afternoon][cta]" 
                                               rows="3" 
                                               style="width: 100%; max-width: 500px;"
-                                              placeholder="例: ランチタイムセール中！&#10;お買い物はお済みですか？&#10;今だけ特別価格です"><?php 
+                                              placeholder="例: ランチタイムセール中！&#10;お買い物はお済みですか？&#10;今だけ特別価格です"
+                                              data-char-limit="25"><?php 
                                         echo esc_textarea(implode("\n", isset($custom_messages['afternoon']['cta']) ? $custom_messages['afternoon']['cta'] : $default_messages['afternoon']['cta']));
                                     ?></textarea>
                                 </div>
@@ -350,7 +419,8 @@ $custom_messages = isset($options['custom_messages']) ? $options['custom_message
                                               name="acb_options[custom_messages][evening][greeting]" 
                                               rows="3" 
                                               style="width: 100%; max-width: 500px;"
-                                              placeholder="例: お疲れ様です🌅&#10;夕方になりましたね&#10;今日もお疲れ様でした"><?php 
+                                              placeholder="例: お疲れ様です🌅&#10;夕方になりましたね&#10;今日もお疲れ様でした"
+                                              data-char-limit="25"><?php 
                                         echo esc_textarea(implode("\n", isset($custom_messages['evening']['greeting']) ? $custom_messages['evening']['greeting'] : $default_messages['evening']['greeting']));
                                     ?></textarea>
                                 </div>
@@ -360,7 +430,8 @@ $custom_messages = isset($options['custom_messages']) ? $options['custom_message
                                               name="acb_options[custom_messages][evening][cta]" 
                                               rows="3" 
                                               style="width: 100%; max-width: 500px;"
-                                              placeholder="例: 帰宅前にチェック！&#10;夜のお得情報あります&#10;限定セール開催中"><?php 
+                                              placeholder="例: 帰宅前にチェック！&#10;夜のお得情報あります&#10;限定セール開催中"
+                                              data-char-limit="25"><?php 
                                         echo esc_textarea(implode("\n", isset($custom_messages['evening']['cta']) ? $custom_messages['evening']['cta'] : $default_messages['evening']['cta']));
                                     ?></textarea>
                                 </div>
@@ -379,7 +450,8 @@ $custom_messages = isset($options['custom_messages']) ? $options['custom_message
                                               name="acb_options[custom_messages][night][greeting]" 
                                               rows="3" 
                                               style="width: 100%; max-width: 500px;"
-                                              placeholder="例: 今日もお疲れ様でした🌙&#10;おつかれさまです&#10;ゆっくりお過ごしください"><?php 
+                                              placeholder="例: 今日もお疲れ様でした🌙&#10;おつかれさまです&#10;ゆっくりお過ごしください"
+                                              data-char-limit="25"><?php 
                                         echo esc_textarea(implode("\n", isset($custom_messages['night']['greeting']) ? $custom_messages['night']['greeting'] : $default_messages['night']['greeting']));
                                     ?></textarea>
                                 </div>
@@ -389,7 +461,8 @@ $custom_messages = isset($options['custom_messages']) ? $options['custom_message
                                               name="acb_options[custom_messages][night][cta]" 
                                               rows="3" 
                                               style="width: 100%; max-width: 500px;"
-                                              placeholder="例: お買い物は済みましたか？&#10;夜のタイムセール中！&#10;明日の準備はいかがですか？"><?php 
+                                              placeholder="例: お買い物は済みましたか？&#10;夜のタイムセール中！&#10;明日の準備はいかがですか？"
+                                              data-char-limit="25"><?php 
                                         echo esc_textarea(implode("\n", isset($custom_messages['night']['cta']) ? $custom_messages['night']['cta'] : $default_messages['night']['cta']));
                                     ?></textarea>
                                 </div>
@@ -407,6 +480,7 @@ $custom_messages = isset($options['custom_messages']) ? $options['custom_message
                                         <li>設定したメッセージからランダムに選択されて表示されます</li>
                                         <li>絵文字や特殊文字も使用可能です</li>
                                         <li>空欄の場合はデフォルトメッセージが使用されます</li>
+                                        <li><strong>1メッセージあたり25文字以内で入力してください</strong></li>
                                     </ul>
                                     <p style="margin: 10px 0 0 0;"><strong>⏰ 表示タイミング:</strong> 挨拶メッセージが5秒間表示され、その後CTAメッセージが4秒間表示されます。</p>
                                 </div>
@@ -515,7 +589,69 @@ jQuery(document).ready(function($) {
         });
     }
     
+    // 文字数カウンター機能
+    function setupCharCounters() {
+        $('textarea[data-char-limit]').each(function() {
+            var $textarea = $(this);
+            var limit = parseInt($textarea.data('char-limit'));
+            var counterId = $textarea.attr('id') + '_counter';
+            
+            // カウンター要素を作成
+            var $counter = $('<div>', {
+                id: counterId,
+                style: 'font-size: 12px; color: #666; margin-top: 5px; text-align: right;'
+            });
+            
+            // textareaの後に挿入
+            $textarea.after($counter);
+            
+            // カウント更新関数
+            function updateCounter() {
+                var currentLength = $textarea.val().split('\n').map(function(line) {
+                    return line.trim();
+                }).filter(function(line) {
+                    return line.length > 0;
+                }).map(function(line) {
+                    return line.length;
+                });
+                
+                var maxLength = Math.max.apply(Math, currentLength.concat([0]));
+                var color = maxLength > limit ? '#d63384' : maxLength > limit * 0.8 ? '#ff9500' : '#666';
+                
+                if (currentLength.length === 0) {
+                    $counter.html('<span style="color: ' + color + ';">文字数: 0/' + limit + '</span>');
+                } else {
+                    var longestLine = currentLength.indexOf(maxLength) + 1;
+                    $counter.html('<span style="color: ' + color + ';">最長行 ' + longestLine + ': ' + maxLength + '/' + limit + '文字</span>');
+                }
+            }
+            
+            // 入力制限機能
+            $textarea.on('input', function() {
+                var lines = $textarea.val().split('\n');
+                var modifiedLines = lines.map(function(line) {
+                    if (line.length > limit) {
+                        return line.substring(0, limit);
+                    }
+                    return line;
+                });
+                
+                if (modifiedLines.join('\n') !== $textarea.val()) {
+                    $textarea.val(modifiedLines.join('\n'));
+                }
+                
+                updateCounter();
+            });
+            
+            // 初期カウント表示
+            updateCounter();
+        });
+    }
+    
     // 設定値変更時にリアルタイムでプレビュー更新
     $('#acb_icon_size, #acb_opacity, #acb_position_left, #acb_position_bottom, #acb_border_radius').on('input', updatePreview);
+    
+    // 文字数カウンター初期化
+    setupCharCounters();
 });
 </script>

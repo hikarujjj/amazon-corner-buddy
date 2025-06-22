@@ -104,21 +104,23 @@
             if (!wasVisible) {
                 this.speechBubble.css({
                     'visibility': 'hidden',
-                    'display': 'block'
+                    'display': 'block',
+                    'opacity': '0'
                 });
             }
             
-            const bubbleWidth = this.speechBubble.outerWidth() || 180; // フォールバック値
+            const bubbleWidth = this.speechBubble.outerWidth() || 200; // フォールバック値を200pxに調整
+            const bubbleHeight = this.speechBubble.outerHeight() || 40;
             
             if (!wasVisible) {
                 this.speechBubble.css({
                     'visibility': 'visible',
-                    'display': 'none'
+                    'display': 'none',
+                    'opacity': ''
                 });
             }
 
             // アイコン左端から吹き出しが始まるように計算
-            // 吹き出し幅 - アイコン幅 = 左にずらす距離
             let leftPosition = -(bubbleWidth - iconSize * 0.1); // アイコン左端から少し内側
             
             // 画面端からのはみ出しを防ぐ
@@ -126,10 +128,19 @@
             const minLeft = -iconLeft + 10; // 画面左端から10px余裕
             leftPosition = Math.max(leftPosition, minLeft);
             
-            // 吹き出しに位置を適用
-            this.speechBubble.css('left', leftPosition + 'px');
+            // 複数行対応：吹き出しの高さに応じてtop位置を調整
+            let topPosition = -45; // デフォルト位置
+            if (bubbleHeight > 30) {
+                topPosition = -(bubbleHeight + 15); // 高さ + 余白
+            }
             
-            console.log(`Amazon Corner Buddy: Speech bubble position calculated - Icon: ${iconSize}px, Bubble: ${bubbleWidth}px, Left: ${leftPosition}px`);
+            // 吹き出しに位置を適用
+            this.speechBubble.css({
+                'left': leftPosition + 'px',
+                'top': topPosition + 'px'
+            });
+            
+            console.log(`Amazon Corner Buddy: Speech bubble position calculated - Icon: ${iconSize}px, Bubble: ${bubbleWidth}x${bubbleHeight}px, Position: left=${leftPosition}px, top=${topPosition}px`);
         }
 
         // 吹き出し要素のセットアップ
@@ -275,13 +286,28 @@
             }
 
             const messages = this.getGreetingMessages();
-            const greetingMsg = messages.greeting[Math.floor(Math.random() * messages.greeting.length)];
-            const ctaMsg = messages.cta[Math.floor(Math.random() * messages.cta.length)];
+            let greetingMsg = messages.greeting[Math.floor(Math.random() * messages.greeting.length)];
+            let ctaMsg = messages.cta[Math.floor(Math.random() * messages.cta.length)];
+            
+            // 25文字制限（フェイルセーフ）
+            if (greetingMsg && greetingMsg.length > 25) {
+                greetingMsg = greetingMsg.substring(0, 25);
+                console.warn('Amazon Corner Buddy: Greeting message trimmed to 25 characters');
+            }
+            if (ctaMsg && ctaMsg.length > 25) {
+                ctaMsg = ctaMsg.substring(0, 25);
+                console.warn('Amazon Corner Buddy: CTA message trimmed to 25 characters');
+            }
 
             // 第1段階：挨拶表示
             this.speechBubble.text(greetingMsg);
             this.speechBubble.removeClass('acb-second-phase acb-fade-out acb-pulse');
             this.speechBubble.addClass('acb-show');
+            
+            // 位置を再計算（メッセージ内容変更により高さが変わる可能性）
+            setTimeout(() => {
+                this.calculateSpeechBubblePosition();
+            }, 50);
 
             // 第2段階：CTA表示（5秒後）- スムーズなテキスト切り替え
             setTimeout(() => {
@@ -295,6 +321,11 @@
                             this.speechBubble.text(ctaMsg);
                             this.speechBubble.removeClass('acb-text-fade-out');
                             this.speechBubble.addClass('acb-second-phase acb-pulse acb-text-fade-in');
+                            
+                            // 位置を再計算（メッセージ内容変更により高さが変わる可能性）
+                            setTimeout(() => {
+                                this.calculateSpeechBubblePosition();
+                            }, 50);
                             
                             // フェードイン完了後にクラス整理
                             setTimeout(() => {

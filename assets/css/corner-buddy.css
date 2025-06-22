@@ -205,7 +205,8 @@
     border-radius: 12px !important;
     font-size: 12px !important;
     font-weight: 500 !important;
-    white-space: nowrap !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
     box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3) !important;
     z-index: 10000 !important;
     opacity: 0 !important;
@@ -214,8 +215,9 @@
     pointer-events: none !important;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
     letter-spacing: 0.3px !important;
-    line-height: 1.2 !important;
-    max-width: 180px !important;
+    line-height: 1.3 !important;
+    max-width: 200px !important;
+    min-width: 120px !important;
 }
 
 /* 吹き出しの矢印 */
@@ -284,8 +286,10 @@
         padding: 6px 10px !important;
         top: -40px !important;
         left: 0px !important;
-        max-width: 150px !important;
+        max-width: 180px !important;
+        min-width: 100px !important;
         border-radius: 10px !important;
+        line-height: 1.2 !important;
     }
     
     #acb-speech-bubble::after {
@@ -304,10 +308,9 @@
         padding: 5px 8px !important;
         top: -35px !important;
         left: 0px !important;
-        max-width: 160px !important;
-        white-space: nowrap !important;
-        /* 画面からはみ出る場合のスクロール防止 */
         max-width: calc(100vw - 55px) !important;
+        min-width: 80px !important;
+        line-height: 1.2 !important;
     }
 }
 

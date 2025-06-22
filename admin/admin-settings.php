@@ -24,7 +24,34 @@ if (isset($_POST['submit']) && check_admin_referer('acb_settings_nonce')) {
         'border_radius' => max(0, min(50, intval($_POST['acb_options']['border_radius']))),
         'link_url' => esc_url_raw($_POST['acb_options']['link_url']),
         'speech_bubble_enabled' => isset($_POST['acb_options']['speech_bubble_enabled']) ? true : false,
-        'speech_bubble_frequency' => max(3, min(10, intval($_POST['acb_options']['speech_bubble_frequency'])))
+        'speech_bubble_frequency' => max(1, min(5, intval($_POST['acb_options']['speech_bubble_frequency']))),
+        // カスタムメッセージ設定
+        'custom_messages' => array(
+            'morning' => array(
+                'greeting' => isset($_POST['acb_options']['custom_messages']['morning']['greeting']) ? 
+                    array_map('sanitize_text_field', array_filter(explode("\n", $_POST['acb_options']['custom_messages']['morning']['greeting']))) : array(),
+                'cta' => isset($_POST['acb_options']['custom_messages']['morning']['cta']) ? 
+                    array_map('sanitize_text_field', array_filter(explode("\n", $_POST['acb_options']['custom_messages']['morning']['cta']))) : array()
+            ),
+            'afternoon' => array(
+                'greeting' => isset($_POST['acb_options']['custom_messages']['afternoon']['greeting']) ? 
+                    array_map('sanitize_text_field', array_filter(explode("\n", $_POST['acb_options']['custom_messages']['afternoon']['greeting']))) : array(),
+                'cta' => isset($_POST['acb_options']['custom_messages']['afternoon']['cta']) ? 
+                    array_map('sanitize_text_field', array_filter(explode("\n", $_POST['acb_options']['custom_messages']['afternoon']['cta']))) : array()
+            ),
+            'evening' => array(
+                'greeting' => isset($_POST['acb_options']['custom_messages']['evening']['greeting']) ? 
+                    array_map('sanitize_text_field', array_filter(explode("\n", $_POST['acb_options']['custom_messages']['evening']['greeting']))) : array(),
+                'cta' => isset($_POST['acb_options']['custom_messages']['evening']['cta']) ? 
+                    array_map('sanitize_text_field', array_filter(explode("\n", $_POST['acb_options']['custom_messages']['evening']['cta']))) : array()
+            ),
+            'night' => array(
+                'greeting' => isset($_POST['acb_options']['custom_messages']['night']['greeting']) ? 
+                    array_map('sanitize_text_field', array_filter(explode("\n", $_POST['acb_options']['custom_messages']['night']['greeting']))) : array(),
+                'cta' => isset($_POST['acb_options']['custom_messages']['night']['cta']) ? 
+                    array_map('sanitize_text_field', array_filter(explode("\n", $_POST['acb_options']['custom_messages']['night']['cta']))) : array()
+            )
+        )
     );
     
     update_option('acb_options', $new_options);
@@ -41,7 +68,29 @@ $position_left = isset($options['position_left']) ? $options['position_left'] : 
 $border_radius = isset($options['border_radius']) ? $options['border_radius'] : 12;
 $link_url = isset($options['link_url']) ? $options['link_url'] : 'https://amzn.to/446mmWI';
 $speech_bubble_enabled = isset($options['speech_bubble_enabled']) ? $options['speech_bubble_enabled'] : true;
-$speech_bubble_frequency = isset($options['speech_bubble_frequency']) ? $options['speech_bubble_frequency'] : 6;
+$speech_bubble_frequency = isset($options['speech_bubble_frequency']) ? $options['speech_bubble_frequency'] : 3;
+
+// カスタムメッセージのデフォルト値
+$default_messages = array(
+    'morning' => array(
+        'greeting' => array('おはようございます☀️', '素敵な一日の始まりですね', '今日も頑張りましょう✨'),
+        'cta' => array('お得な商品をチェック！', '新商品が入荷しています', '朝の特別セールあります')
+    ),
+    'afternoon' => array(
+        'greeting' => array('こんにちは😊', 'お疲れ様です', '午後もお疲れ様'),
+        'cta' => array('ランチタイムセール中！', 'お買い物はお済みですか？', '今だけ特別価格です')
+    ),
+    'evening' => array(
+        'greeting' => array('お疲れ様です🌅', '夕方になりましたね', '今日もお疲れ様でした'),
+        'cta' => array('帰宅前にチェック！', '夜のお得情報あります', '限定セール開催中')
+    ),
+    'night' => array(
+        'greeting' => array('今日もお疲れ様でした🌙', 'おつかれさまです', 'ゆっくりお過ごしください'),
+        'cta' => array('お買い物は済みましたか？', '夜のタイムセール中！', '明日の準備はいかがですか？')
+    )
+);
+
+$custom_messages = isset($options['custom_messages']) ? $options['custom_messages'] : $default_messages;
 ?>
 
 <div class="wrap">
@@ -213,40 +262,154 @@ $speech_bubble_frequency = isset($options['speech_bubble_frequency']) ? $options
                                 <select id="acb_speech_bubble_frequency" 
                                         name="acb_options[speech_bubble_frequency]" 
                                         style="width: 200px;">
-                                    <option value="3" <?php selected(3, $speech_bubble_frequency); ?>>とても頻繁（3回に1回）</option>
-                                    <option value="4" <?php selected(4, $speech_bubble_frequency); ?>>頻繁（4回に1回）</option>
-                                    <option value="5" <?php selected(5, $speech_bubble_frequency); ?>>やや頻繁（5回に1回）</option>
-                                    <option value="6" <?php selected(6, $speech_bubble_frequency); ?>>標準（6回に1回）</option>
-                                    <option value="7" <?php selected(7, $speech_bubble_frequency); ?>>控えめ（7回に1回）</option>
-                                    <option value="8" <?php selected(8, $speech_bubble_frequency); ?>>とても控えめ（8回に1回）</option>
-                                    <option value="10" <?php selected(10, $speech_bubble_frequency); ?>>稀に（10回に1回）</option>
+                                    <option value="1" <?php selected(1, $speech_bubble_frequency); ?>>とても頻繁（毎回表示）</option>
+                                    <option value="2" <?php selected(2, $speech_bubble_frequency); ?>>頻繁（2回に1回）</option>
+                                    <option value="3" <?php selected(3, $speech_bubble_frequency); ?>>標準（3回に1回）</option>
+                                    <option value="4" <?php selected(4, $speech_bubble_frequency); ?>>控え目（4回に1回）</option>
+                                    <option value="5" <?php selected(5, $speech_bubble_frequency); ?>>とても控え目（5回に1回）</option>
                                 </select>
                                 <p class="description">アニメーション何回に1回吹き出しを表示するかを設定します。</p>
                             </td>
                         </tr>
                         
+                        <!-- カスタムメッセージ編集 -->
+                        <tr>
+                            <th scope="row" colspan="2">
+                                <h3 style="margin: 30px 0 10px 0; color: #d63384;">✏️ カスタムメッセージ編集</h3>
+                                <p style="color: #666; margin-bottom: 20px;">各時間帯の吹き出しメッセージをカスタマイズできます。メッセージは改行区切りで複数設定でき、ランダムに表示されます。</p>
+                            </th>
+                        </tr>
+                        
+                        <!-- 朝のメッセージ -->
+                        <tr>
+                            <th scope="row">
+                                <label for="acb_morning_greeting">🌅 朝（5:00-9:59）</label>
+                            </th>
+                            <td>
+                                <div style="margin-bottom: 15px;">
+                                    <label for="acb_morning_greeting" style="font-weight: bold; display: block; margin-bottom: 5px;">挨拶メッセージ:</label>
+                                    <textarea id="acb_morning_greeting" 
+                                              name="acb_options[custom_messages][morning][greeting]" 
+                                              rows="3" 
+                                              style="width: 100%; max-width: 500px;"
+                                              placeholder="例: おはようございます☀️&#10;素敵な一日の始まりですね&#10;今日も頑張りましょう✨"><?php 
+                                        echo esc_textarea(implode("\n", isset($custom_messages['morning']['greeting']) ? $custom_messages['morning']['greeting'] : $default_messages['morning']['greeting']));
+                                    ?></textarea>
+                                </div>
+                                <div>
+                                    <label for="acb_morning_cta" style="font-weight: bold; display: block; margin-bottom: 5px;">CTAメッセージ:</label>
+                                    <textarea id="acb_morning_cta" 
+                                              name="acb_options[custom_messages][morning][cta]" 
+                                              rows="3" 
+                                              style="width: 100%; max-width: 500px;"
+                                              placeholder="例: お得な商品をチェック！&#10;新商品が入荷しています&#10;朝の特別セールあります"><?php 
+                                        echo esc_textarea(implode("\n", isset($custom_messages['morning']['cta']) ? $custom_messages['morning']['cta'] : $default_messages['morning']['cta']));
+                                    ?></textarea>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <!-- 昼のメッセージ -->
+                        <tr>
+                            <th scope="row">
+                                <label for="acb_afternoon_greeting">☀️ 昼（10:00-14:59）</label>
+                            </th>
+                            <td>
+                                <div style="margin-bottom: 15px;">
+                                    <label for="acb_afternoon_greeting" style="font-weight: bold; display: block; margin-bottom: 5px;">挨拶メッセージ:</label>
+                                    <textarea id="acb_afternoon_greeting" 
+                                              name="acb_options[custom_messages][afternoon][greeting]" 
+                                              rows="3" 
+                                              style="width: 100%; max-width: 500px;"
+                                              placeholder="例: こんにちは😊&#10;お疲れ様です&#10;午後もお疲れ様"><?php 
+                                        echo esc_textarea(implode("\n", isset($custom_messages['afternoon']['greeting']) ? $custom_messages['afternoon']['greeting'] : $default_messages['afternoon']['greeting']));
+                                    ?></textarea>
+                                </div>
+                                <div>
+                                    <label for="acb_afternoon_cta" style="font-weight: bold; display: block; margin-bottom: 5px;">CTAメッセージ:</label>
+                                    <textarea id="acb_afternoon_cta" 
+                                              name="acb_options[custom_messages][afternoon][cta]" 
+                                              rows="3" 
+                                              style="width: 100%; max-width: 500px;"
+                                              placeholder="例: ランチタイムセール中！&#10;お買い物はお済みですか？&#10;今だけ特別価格です"><?php 
+                                        echo esc_textarea(implode("\n", isset($custom_messages['afternoon']['cta']) ? $custom_messages['afternoon']['cta'] : $default_messages['afternoon']['cta']));
+                                    ?></textarea>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <!-- 夕方のメッセージ -->
+                        <tr>
+                            <th scope="row">
+                                <label for="acb_evening_greeting">🌅 夕方（15:00-18:59）</label>
+                            </th>
+                            <td>
+                                <div style="margin-bottom: 15px;">
+                                    <label for="acb_evening_greeting" style="font-weight: bold; display: block; margin-bottom: 5px;">挨拶メッセージ:</label>
+                                    <textarea id="acb_evening_greeting" 
+                                              name="acb_options[custom_messages][evening][greeting]" 
+                                              rows="3" 
+                                              style="width: 100%; max-width: 500px;"
+                                              placeholder="例: お疲れ様です🌅&#10;夕方になりましたね&#10;今日もお疲れ様でした"><?php 
+                                        echo esc_textarea(implode("\n", isset($custom_messages['evening']['greeting']) ? $custom_messages['evening']['greeting'] : $default_messages['evening']['greeting']));
+                                    ?></textarea>
+                                </div>
+                                <div>
+                                    <label for="acb_evening_cta" style="font-weight: bold; display: block; margin-bottom: 5px;">CTAメッセージ:</label>
+                                    <textarea id="acb_evening_cta" 
+                                              name="acb_options[custom_messages][evening][cta]" 
+                                              rows="3" 
+                                              style="width: 100%; max-width: 500px;"
+                                              placeholder="例: 帰宅前にチェック！&#10;夜のお得情報あります&#10;限定セール開催中"><?php 
+                                        echo esc_textarea(implode("\n", isset($custom_messages['evening']['cta']) ? $custom_messages['evening']['cta'] : $default_messages['evening']['cta']));
+                                    ?></textarea>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <!-- 夜のメッセージ -->
+                        <tr>
+                            <th scope="row">
+                                <label for="acb_night_greeting">🌙 夜（19:00-4:59）</label>
+                            </th>
+                            <td>
+                                <div style="margin-bottom: 15px;">
+                                    <label for="acb_night_greeting" style="font-weight: bold; display: block; margin-bottom: 5px;">挨拶メッセージ:</label>
+                                    <textarea id="acb_night_greeting" 
+                                              name="acb_options[custom_messages][night][greeting]" 
+                                              rows="3" 
+                                              style="width: 100%; max-width: 500px;"
+                                              placeholder="例: 今日もお疲れ様でした🌙&#10;おつかれさまです&#10;ゆっくりお過ごしください"><?php 
+                                        echo esc_textarea(implode("\n", isset($custom_messages['night']['greeting']) ? $custom_messages['night']['greeting'] : $default_messages['night']['greeting']));
+                                    ?></textarea>
+                                </div>
+                                <div>
+                                    <label for="acb_night_cta" style="font-weight: bold; display: block; margin-bottom: 5px;">CTAメッセージ:</label>
+                                    <textarea id="acb_night_cta" 
+                                              name="acb_options[custom_messages][night][cta]" 
+                                              rows="3" 
+                                              style="width: 100%; max-width: 500px;"
+                                              placeholder="例: お買い物は済みましたか？&#10;夜のタイムセール中！&#10;明日の準備はいかがですか？"><?php 
+                                        echo esc_textarea(implode("\n", isset($custom_messages['night']['cta']) ? $custom_messages['night']['cta'] : $default_messages['night']['cta']));
+                                    ?></textarea>
+                                </div>
+                            </td>
+                        </tr>
+                        
                         <!-- メッセージ例 -->
                         <tr>
-                            <th scope="row">メッセージ例</th>
+                            <th scope="row">設定のヒント</th>
                             <td>
-                                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; border-left: 4px solid #0073aa;">
-                                    <strong>🌅 朝（5:00-9:59）:</strong><br>
-                                    挨拶: 「おはようございます☀️」「素敵な一日の始まりですね」<br>
-                                    CTA: 「お得な商品をチェック！」「朝の特別セールあります」<br><br>
-                                    
-                                    <strong>☀️ 昼（10:00-14:59）:</strong><br>
-                                    挨拶: 「こんにちは😊」「お疲れ様です」<br>
-                                    CTA: 「ランチタイムセール中！」「お買い物はお済みですか？」<br><br>
-                                    
-                                    <strong>🌅 夕方（15:00-18:59）:</strong><br>
-                                    挨拶: 「お疲れ様です🌅」「今日もお疲れ様でした」<br>
-                                    CTA: 「帰宅前にチェック！」「限定セール開催中」<br><br>
-                                    
-                                    <strong>🌙 夜（19:00-4:59）:</strong><br>
-                                    挨拶: 「今日もお疲れ様でした🌙」「ゆっくりお過ごしください」<br>
-                                    CTA: 「お買い物は済みましたか？」「夜のタイムセール中！」
+                                <div style="background: #e7f3ff; padding: 15px; border-radius: 6px; border-left: 4px solid #0073aa;">
+                                    <p style="margin: 0 0 10px 0;"><strong>📝 編集方法:</strong></p>
+                                    <ul style="margin: 0; padding-left: 20px;">
+                                        <li>各メッセージは改行区切りで複数設定できます</li>
+                                        <li>設定したメッセージからランダムに選択されて表示されます</li>
+                                        <li>絵文字や特殊文字も使用可能です</li>
+                                        <li>空欄の場合はデフォルトメッセージが使用されます</li>
+                                    </ul>
+                                    <p style="margin: 10px 0 0 0;"><strong>⏰ 表示タイミング:</strong> 挨拶メッセージが3秒間表示され、その後CTAメッセージに切り替わります。</p>
                                 </div>
-                                <p class="description">メッセージは時間帯に応じて自動で切り替わり、３秒後に挨拶からCTAに変化します。</p>
                             </td>
                         </tr>
                     </tbody>

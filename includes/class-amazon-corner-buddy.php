@@ -89,6 +89,38 @@ class Amazon_Corner_Buddy {
             true
         );
         
+        // デフォルトのカスタムメッセージ
+        $default_custom_messages = array(
+            'morning' => array(
+                'greeting' => array('おはようございます☀️', '素敵な一日の始まりですね', '今日も頑張りましょう✨'),
+                'cta' => array('お得な商品をチェック！', '新商品が入荷しています', '朝の特別セールあります')
+            ),
+            'afternoon' => array(
+                'greeting' => array('こんにちは😊', 'お疲れ様です', '午後もお疲れ様'),
+                'cta' => array('ランチタイムセール中！', 'お買い物はお済みですか？', '今だけ特別価格です')
+            ),
+            'evening' => array(
+                'greeting' => array('お疲れ様です🌅', '夕方になりましたね', '今日もお疲れ様でした'),
+                'cta' => array('帰宅前にチェック！', '夜のお得情報あります', '限定セール開催中')
+            ),
+            'night' => array(
+                'greeting' => array('今日もお疲れ様でした🌙', 'おつかれさまです', 'ゆっくりお過ごしください'),
+                'cta' => array('お買い物は済みましたか？', '夜のタイムセール中！', '明日の準備はいかがですか？')
+            )
+        );
+        
+        // カスタムメッセージ設定を取得
+        $custom_messages = $this->get_option('custom_messages', $default_custom_messages);
+        
+        // 空の配列の場合はデフォルトを使用
+        foreach ($default_custom_messages as $time => $messages) {
+            foreach ($messages as $type => $default_array) {
+                if (empty($custom_messages[$time][$type])) {
+                    $custom_messages[$time][$type] = $default_array;
+                }
+            }
+        }
+
         // JavaScriptに設定値を渡す
         wp_localize_script('acb-frontend-script', 'acb_vars', array(
             'animation_interval' => $this->get_option('animation_interval', 10) * 1000, // ミリ秒に変換
@@ -100,7 +132,8 @@ class Amazon_Corner_Buddy {
             'icon_url' => ACB_PLUGIN_URL . 'assets/images/amazon-icon.svg',
             'link_url' => $this->get_option('link_url', 'https://amzn.to/446mmWI'),
             'speech_bubble_enabled' => $this->get_option('speech_bubble_enabled', true),
-            'speech_bubble_frequency' => $this->get_option('speech_bubble_frequency', 6)
+            'speech_bubble_frequency' => $this->get_option('speech_bubble_frequency', 3),
+            'custom_messages' => $custom_messages
         ));
     }
     
@@ -262,7 +295,24 @@ class Amazon_Corner_Buddy {
         $sanitized['border_radius'] = max(0, min(50, intval($input['border_radius'])));
         $sanitized['link_url'] = esc_url_raw($input['link_url']);
         $sanitized['speech_bubble_enabled'] = isset($input['speech_bubble_enabled']) ? (bool) $input['speech_bubble_enabled'] : false;
-        $sanitized['speech_bubble_frequency'] = max(3, min(10, intval($input['speech_bubble_frequency'])));
+        $sanitized['speech_bubble_frequency'] = max(1, min(5, intval($input['speech_bubble_frequency'])));
+        
+        // カスタムメッセージのサニタイズ
+        if (isset($input['custom_messages']) && is_array($input['custom_messages'])) {
+            $sanitized['custom_messages'] = array();
+            $time_periods = array('morning', 'afternoon', 'evening', 'night');
+            $message_types = array('greeting', 'cta');
+            
+            foreach ($time_periods as $time) {
+                if (isset($input['custom_messages'][$time]) && is_array($input['custom_messages'][$time])) {
+                    foreach ($message_types as $type) {
+                        if (isset($input['custom_messages'][$time][$type]) && is_array($input['custom_messages'][$time][$type])) {
+                            $sanitized['custom_messages'][$time][$type] = array_map('sanitize_text_field', $input['custom_messages'][$time][$type]);
+                        }
+                    }
+                }
+            }
+        }
         
         return $sanitized;
     }

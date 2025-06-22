@@ -45,31 +45,49 @@
         getGreetingMessages() {
             const hour = new Date().getHours();
             
-            if (hour >= 5 && hour < 10) {
-                // 朝 (5:00-9:59)
-                return {
+            // デフォルトメッセージ（設定が取得できない場合のフォールバック）
+            const defaultMessages = {
+                morning: {
                     greeting: ["おはようございます☀️", "素敵な一日の始まりですね", "今日も頑張りましょう✨"],
                     cta: ["お得な商品をチェック！", "新商品が入荷しています", "朝の特別セールあります"]
-                };
-            } else if (hour >= 10 && hour < 15) {
-                // 昼 (10:00-14:59)
-                return {
+                },
+                afternoon: {
                     greeting: ["こんにちは😊", "お疲れ様です", "午後もお疲れ様"],
                     cta: ["ランチタイムセール中！", "お買い物はお済みですか？", "今だけ特別価格です"]
-                };
-            } else if (hour >= 15 && hour < 19) {
-                // 夕方 (15:00-18:59)
-                return {
+                },
+                evening: {
                     greeting: ["お疲れ様です🌅", "夕方になりましたね", "今日もお疲れ様でした"],
                     cta: ["帰宅前にチェック！", "夜のお得情報あります", "限定セール開催中"]
-                };
-            } else {
-                // 夜 (19:00-4:59)
-                return {
+                },
+                night: {
                     greeting: ["今日もお疲れ様でした🌙", "おつかれさまです", "ゆっくりお過ごしください"],
                     cta: ["お買い物は済みましたか？", "夜のタイムセール中！", "明日の準備はいかがですか？"]
-                };
+                }
+            };
+            
+            // 設定からカスタムメッセージを取得
+            const customMessages = this.settings.custom_messages || defaultMessages;
+            
+            let timeOfDay;
+            if (hour >= 5 && hour < 10) {
+                timeOfDay = 'morning';
+            } else if (hour >= 10 && hour < 15) {
+                timeOfDay = 'afternoon';
+            } else if (hour >= 15 && hour < 19) {
+                timeOfDay = 'evening';
+            } else {
+                timeOfDay = 'night';
             }
+            
+            // カスタムメッセージが存在し、配列が空でない場合はそれを使用、そうでなければデフォルトを使用
+            const messages = customMessages[timeOfDay] || defaultMessages[timeOfDay];
+            const greeting = (messages.greeting && messages.greeting.length > 0) ? messages.greeting : defaultMessages[timeOfDay].greeting;
+            const cta = (messages.cta && messages.cta.length > 0) ? messages.cta : defaultMessages[timeOfDay].cta;
+            
+            return {
+                greeting: greeting,
+                cta: cta
+            };
         }
 
         // 吹き出し要素のセットアップ
@@ -114,11 +132,20 @@
         startAnimationTimer() {
             if (!this.element || this.element.length === 0) return;
 
+            // 既存のタイマーをクリア（重複防止）
+            if (this.animationTimer) {
+                clearInterval(this.animationTimer);
+                this.animationTimer = null;
+                console.log('Amazon Corner Buddy: Cleared existing timer before starting new one');
+            }
+
             // 設定から間隔を取得（デフォルト10秒）
             const interval = this.settings.animation_interval || 10000;
 
             // 最初のアニメーションは開始から少し遅らせる（3-7秒後）
             const initialDelay = 3000 + Math.random() * 4000;
+
+            console.log(`Amazon Corner Buddy: Starting animation timer with ${interval}ms interval`);
 
             setTimeout(() => {
                 this.performRandomAnimation();
@@ -127,6 +154,7 @@
                 this.animationTimer = setInterval(() => {
                     this.performRandomAnimation();
                 }, interval);
+                console.log('Amazon Corner Buddy: Animation timer started successfully');
             }, initialDelay);
         }
 
@@ -147,7 +175,7 @@
             // ランダムアニメーション選択
             const randomAnimation = animations[Math.floor(Math.random() * animations.length)];
             
-            console.log('Amazon Corner Buddy: Playing animation -', randomAnimation);
+            console.log(`Amazon Corner Buddy: Playing animation ${this.animationCount} - ${randomAnimation}`);
 
             // 既存のアニメーションクラスを削除
             this.removeAllAnimationClasses();
@@ -157,14 +185,17 @@
 
             // 設定された頻度で吹き出しを表示（設定で無効の場合は表示しない）
             const speechBubbleEnabled = this.settings.speech_bubble_enabled !== false;
-            const frequency = this.settings.speech_bubble_frequency || 6;
+            const frequency = this.settings.speech_bubble_frequency || 3;
             const shouldShowBubble = speechBubbleEnabled && (this.animationCount % frequency === 0);
+            
+            console.log(`Amazon Corner Buddy: Speech bubble check - Count: ${this.animationCount}, Frequency: ${frequency}, Enabled: ${speechBubbleEnabled}, Should show: ${shouldShowBubble}`);
             
             if (shouldShowBubble) {
                 // アニメーション開始から少し遅れて吹き出し表示
                 setTimeout(() => {
                     this.showSpeechBubble();
                 }, 500);
+                console.log('Amazon Corner Buddy: Speech bubble will be displayed');
             }
 
             // アニメーション完了後にクラスを削除
@@ -249,6 +280,7 @@
             if (this.animationTimer) {
                 clearInterval(this.animationTimer);
                 this.animationTimer = null;
+                console.log('Amazon Corner Buddy: All animations stopped');
             }
             this.removeAllAnimationClasses();
             this.hideSpeechBubble();
@@ -286,11 +318,14 @@
                 // ページが隠れた時はアニメーション一時停止
                 if (cornerBuddy.animationTimer) {
                     clearInterval(cornerBuddy.animationTimer);
+                    cornerBuddy.animationTimer = null; // ← 重要：nullを設定
+                    console.log('Amazon Corner Buddy: Animation paused (visibility hidden)');
                 }
             } else {
                 // ページが表示された時はアニメーション再開
                 if (!cornerBuddy.animationTimer) {
                     cornerBuddy.startAnimationTimer();
+                    console.log('Amazon Corner Buddy: Animation resumed (visibility visible)');
                 }
             }
         });
@@ -300,6 +335,7 @@
     $(window).on('focus', function() {
         if (!cornerBuddy.animationTimer) {
             cornerBuddy.startAnimationTimer();
+            console.log('Amazon Corner Buddy: Animation resumed (window focus)');
         }
     });
 
@@ -307,7 +343,8 @@
         // フォーカス失った時は一時停止
         if (cornerBuddy.animationTimer) {
             clearInterval(cornerBuddy.animationTimer);
-            cornerBuddy.animationTimer = null;
+            cornerBuddy.animationTimer = null; // ← 重要：nullを設定
+            console.log('Amazon Corner Buddy: Animation paused (window blur)');
         }
     });
 

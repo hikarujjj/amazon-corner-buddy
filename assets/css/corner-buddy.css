@@ -264,6 +264,19 @@
     animation: acb-bubble-pulse 2s ease-in-out infinite !important;
 }
 
+/* テキスト切り替え用フェードアニメーション */
+#acb-speech-bubble.acb-text-fade-out {
+    opacity: 0 !important;
+    transform: scale(0.95) translateY(0) !important;
+    transition: opacity 0.15s ease-out, transform 0.15s ease-out !important;
+}
+
+#acb-speech-bubble.acb-text-fade-in {
+    opacity: 1 !important;
+    transform: scale(1) translateY(0) !important;
+    transition: opacity 0.15s ease-in, transform 0.15s ease-in !important;
+}
+
 /* モバイル対応 */
 @media (max-width: 768px) {
     #acb-speech-bubble {

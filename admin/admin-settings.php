@@ -408,7 +408,7 @@ $custom_messages = isset($options['custom_messages']) ? $options['custom_message
                                         <li>絵文字や特殊文字も使用可能です</li>
                                         <li>空欄の場合はデフォルトメッセージが使用されます</li>
                                     </ul>
-                                    <p style="margin: 10px 0 0 0;"><strong>⏰ 表示タイミング:</strong> 挨拶メッセージが3秒間表示され、その後CTAメッセージに切り替わります。</p>
+                                    <p style="margin: 10px 0 0 0;"><strong>⏰ 表示タイミング:</strong> 挨拶メッセージが5秒間表示され、その後CTAメッセージが4秒間表示されます。</p>
                                 </div>
                             </td>
                         </tr>

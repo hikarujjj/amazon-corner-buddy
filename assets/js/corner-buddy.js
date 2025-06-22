@@ -283,31 +283,47 @@
             this.speechBubble.removeClass('acb-second-phase acb-fade-out acb-pulse');
             this.speechBubble.addClass('acb-show');
 
-            // 第2段階：CTA表示（3秒後）
+            // 第2段階：CTA表示（5秒後）- スムーズなテキスト切り替え
             setTimeout(() => {
                 if (this.speechBubble && this.speechBubble.hasClass('acb-show')) {
-                    this.speechBubble.text(ctaMsg);
-                    this.speechBubble.addClass('acb-second-phase acb-pulse');
+                    // フェードアウト開始
+                    this.speechBubble.addClass('acb-text-fade-out');
+                    
+                    // フェードアウト完了後にテキスト変更とフェードイン
+                    setTimeout(() => {
+                        if (this.speechBubble && this.speechBubble.hasClass('acb-show')) {
+                            this.speechBubble.text(ctaMsg);
+                            this.speechBubble.removeClass('acb-text-fade-out');
+                            this.speechBubble.addClass('acb-second-phase acb-pulse acb-text-fade-in');
+                            
+                            // フェードイン完了後にクラス整理
+                            setTimeout(() => {
+                                if (this.speechBubble) {
+                                    this.speechBubble.removeClass('acb-text-fade-in');
+                                }
+                            }, 150);
+                        }
+                    }, 150);
                 }
-            }, 3000);
+            }, 5000);
 
-            // フェードアウト（5秒後）
+            // フェードアウト（9秒後）
             setTimeout(() => {
                 if (this.speechBubble && this.speechBubble.hasClass('acb-show')) {
                     this.speechBubble.addClass('acb-fade-out');
                     
                     // 完全に消去（1.5秒後）
                     setTimeout(() => {
-                        this.speechBubble.removeClass('acb-show acb-second-phase acb-fade-out acb-pulse');
+                        this.speechBubble.removeClass('acb-show acb-second-phase acb-fade-out acb-pulse acb-text-fade-out acb-text-fade-in');
                     }, 1500);
                 }
-            }, 5000);
+            }, 9000);
         }
 
         // 吹き出しを手動で非表示
         hideSpeechBubble() {
             if (this.speechBubble && this.speechBubble.length) {
-                this.speechBubble.removeClass('acb-show acb-second-phase acb-fade-out acb-pulse');
+                this.speechBubble.removeClass('acb-show acb-second-phase acb-fade-out acb-pulse acb-text-fade-out acb-text-fade-in');
             }
         }
 

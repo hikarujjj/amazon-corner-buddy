@@ -1,0 +1,284 @@
+<?php
+/**
+ * Amazon Corner Buddy 管理画面設定ページ
+ *
+ * @package Amazon_Corner_Buddy
+ * @since 1.0.0
+ */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+// 設定の保存処理
+if (isset($_POST['submit']) && check_admin_referer('acb_settings_nonce')) {
+    $options = get_option('acb_options', array());
+    
+    $new_options = array(
+        'enabled' => isset($_POST['acb_options']['enabled']) ? true : false,
+        'animation_interval' => max(1, min(60, intval($_POST['acb_options']['animation_interval']))),
+        'icon_size' => max(20, min(100, intval($_POST['acb_options']['icon_size']))),
+        'opacity' => max(0.1, min(1.0, floatval($_POST['acb_options']['opacity']))),
+        'position_bottom' => max(0, min(500, intval($_POST['acb_options']['position_bottom']))),
+        'position_left' => max(0, min(500, intval($_POST['acb_options']['position_left']))),
+        'border_radius' => max(0, min(50, intval($_POST['acb_options']['border_radius']))),
+        'link_url' => esc_url_raw($_POST['acb_options']['link_url'])
+    );
+    
+    update_option('acb_options', $new_options);
+    echo '<div class="notice notice-success"><p>設定を保存しました。</p></div>';
+}
+
+$options = get_option('acb_options', array());
+$enabled = isset($options['enabled']) ? $options['enabled'] : true;
+$animation_interval = isset($options['animation_interval']) ? $options['animation_interval'] : 10;
+$icon_size = isset($options['icon_size']) ? $options['icon_size'] : 48;
+$opacity = isset($options['opacity']) ? $options['opacity'] : 0.8;
+$position_bottom = isset($options['position_bottom']) ? $options['position_bottom'] : 20;
+$position_left = isset($options['position_left']) ? $options['position_left'] : 20;
+$border_radius = isset($options['border_radius']) ? $options['border_radius'] : 12;
+$link_url = isset($options['link_url']) ? $options['link_url'] : 'https://amzn.to/446mmWI';
+?>
+
+<div class="wrap">
+    <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+    
+    <div style="display: flex; gap: 20px; margin-top: 20px;">
+        <!-- メイン設定エリア -->
+        <div style="flex: 2;">
+            <form method="post" action="">
+                <?php wp_nonce_field('acb_settings_nonce'); ?>
+                
+                <table class="form-table" role="presentation">
+                    <tbody>
+                        <!-- プラグイン有効/無効 -->
+                        <tr>
+                            <th scope="row">
+                                <label for="acb_enabled">プラグインを有効にする</label>
+                            </th>
+                            <td>
+                                <input type="checkbox" 
+                                       id="acb_enabled" 
+                                       name="acb_options[enabled]" 
+                                       value="1" 
+                                       <?php checked(1, $enabled); ?>>
+                                <label for="acb_enabled">Amazon Corner Buddyを表示する</label>
+                                <p class="description">チェックを外すとアイコンが非表示になります。</p>
+                            </td>
+                        </tr>
+                        
+                        <!-- アニメーション間隔 -->
+                        <tr>
+                            <th scope="row">
+                                <label for="acb_animation_interval">アニメーション間隔</label>
+                            </th>
+                            <td>
+                                <input type="number" 
+                                       id="acb_animation_interval" 
+                                       name="acb_options[animation_interval]" 
+                                       value="<?php echo esc_attr($animation_interval); ?>" 
+                                       min="1" 
+                                       max="60" 
+                                       style="width: 80px;"> 秒
+                                <p class="description">アニメーションを実行する間隔を設定します（1-60秒）。</p>
+                            </td>
+                        </tr>
+                        
+                        <!-- アイコンサイズ -->
+                        <tr>
+                            <th scope="row">
+                                <label for="acb_icon_size">アイコンサイズ</label>
+                            </th>
+                            <td>
+                                <input type="number" 
+                                       id="acb_icon_size" 
+                                       name="acb_options[icon_size]" 
+                                       value="<?php echo esc_attr($icon_size); ?>" 
+                                       min="20" 
+                                       max="100" 
+                                       style="width: 80px;"> px
+                                <p class="description">アイコンのサイズを設定します（20-100px）。</p>
+                            </td>
+                        </tr>
+                        
+                        <!-- 透明度 -->
+                        <tr>
+                            <th scope="row">
+                                <label for="acb_opacity">透明度</label>
+                            </th>
+                            <td>
+                                <input type="number" 
+                                       id="acb_opacity" 
+                                       name="acb_options[opacity]" 
+                                       value="<?php echo esc_attr($opacity); ?>" 
+                                       min="0.1" 
+                                       max="1.0" 
+                                       step="0.1" 
+                                       style="width: 80px;">
+                                <p class="description">アイコンの透明度を設定します（0.1-1.0）。1.0で完全不透明。</p>
+                            </td>
+                        </tr>
+                        
+                        <!-- 角丸設定 -->
+                        <tr>
+                            <th scope="row">
+                                <label for="acb_border_radius">角丸の大きさ</label>
+                            </th>
+                            <td>
+                                <input type="number" 
+                                       id="acb_border_radius" 
+                                       name="acb_options[border_radius]" 
+                                       value="<?php echo esc_attr($border_radius); ?>" 
+                                       min="0" 
+                                       max="50" 
+                                       style="width: 80px;"> px
+                                <p class="description">アイコンの角丸の大きさを設定します（0-50px）。0で角丸なし。</p>
+                            </td>
+                        </tr>
+                        
+                        <!-- 位置設定 -->
+                        <tr>
+                            <th scope="row">位置設定</th>
+                            <td>
+                                <label for="acb_position_left">左端からの距離:</label>
+                                <input type="number" 
+                                       id="acb_position_left" 
+                                       name="acb_options[position_left]" 
+                                       value="<?php echo esc_attr($position_left); ?>" 
+                                       min="0" 
+                                       max="500" 
+                                       style="width: 80px;"> px
+                                <br><br>
+                                <label for="acb_position_bottom">下端からの距離:</label>
+                                <input type="number" 
+                                       id="acb_position_bottom" 
+                                       name="acb_options[position_bottom]" 
+                                       value="<?php echo esc_attr($position_bottom); ?>" 
+                                       min="0" 
+                                       max="500" 
+                                       style="width: 80px;"> px
+                                <p class="description">画面の左下角からの距離を設定します。</p>
+                            </td>
+                        </tr>
+                        
+                        <!-- リンクURL -->
+                        <tr>
+                            <th scope="row">
+                                <label for="acb_link_url">リンクURL</label>
+                            </th>
+                            <td>
+                                <input type="url" 
+                                       id="acb_link_url" 
+                                       name="acb_options[link_url]" 
+                                       value="<?php echo esc_attr($link_url); ?>" 
+                                       style="width: 400px;">
+                                <p class="description">アイコンクリック時のリンク先URLを設定します。</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <?php submit_button('設定を保存'); ?>
+            </form>
+        </div>
+        
+        <!-- サイドバー -->
+        <div style="flex: 1;">
+            <!-- プレビューエリア -->
+            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="margin-top: 0;">プレビュー</h3>
+                <div style="position: relative; background: #fff; border: 2px dashed #ddd; height: 200px; border-radius: 4px;">
+                    <div class="acb-admin-preview" style="position: absolute; 
+                               bottom: <?php echo esc_attr($position_bottom); ?>px; 
+                               left: <?php echo esc_attr($position_left); ?>px; 
+                               width: <?php echo esc_attr($icon_size); ?>px; 
+                               height: <?php echo esc_attr($icon_size); ?>px; 
+                               opacity: <?php echo esc_attr($opacity); ?>; 
+                               background: #232f3e; 
+                               border-radius: <?php echo esc_attr($border_radius); ?>px; 
+                               display: flex; 
+                               align-items: center; 
+                               justify-content: center; 
+                               color: white; 
+                               font-weight: bold;">
+                        a
+                    </div>
+                    <div style="position: absolute; bottom: 5px; right: 5px; font-size: 12px; color: #666;">
+                        プレビュー表示
+                    </div>
+                </div>
+                <p style="font-size: 12px; color: #666; margin-bottom: 0;">
+                    実際のサイトでのおおよその表示位置です。
+                </p>
+            </div>
+            
+            <!-- アニメーション一覧 -->
+            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="margin-top: 0;">アニメーション一覧</h3>
+                <ul style="margin: 0; padding-left: 20px;">
+                    <li><strong>Shake</strong> - 軽い揺れ</li>
+                    <li><strong>Bounce</strong> - 跳ねる動き</li>
+                    <li><strong>Wiggle</strong> - くねくね動き</li>
+                    <li><strong>Pulse</strong> - 拡大縮小</li>
+                    <li><strong>Rotate</strong> - 回転</li>
+                    <li><strong>Float</strong> - ふわふわ浮遊</li>
+                </ul>
+                <p style="font-size: 12px; color: #666; margin-bottom: 0;">
+                    これらのアニメーションがランダムに実行されます。
+                </p>
+            </div>
+            
+            <!-- 情報ボックス -->
+            <div style="background: #e7f3ff; padding: 20px; border-radius: 8px; border-left: 4px solid #0073aa;">
+                <h3 style="margin-top: 0; color: #0073aa;">ℹ️ 使用について</h3>
+                <ul style="margin: 0; padding-left: 20px; font-size: 14px;">
+                    <li>軽量で他のプラグインとの競合を最小限に抑制</li>
+                    <li>モバイル端末でも適切に表示</li>
+                    <li>アクセシビリティ設定に対応</li>
+                    <li>タブが非アクティブ時はアニメーション停止</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* 管理画面専用スタイル */
+.acb-admin-preview {
+    transition: all 0.3s ease;
+}
+
+#acb_icon_size, #acb_opacity, #acb_position_left, #acb_position_bottom {
+    transition: all 0.3s ease;
+}
+
+/* 設定変更時のライブプレビュー用スタイル */
+.acb-preview-container {
+    transition: all 0.3s ease;
+}
+</style>
+
+<script>
+jQuery(document).ready(function($) {
+    // ライブプレビュー機能
+    function updatePreview() {
+        var iconSize = $('#acb_icon_size').val();
+        var opacity = $('#acb_opacity').val();
+        var positionLeft = $('#acb_position_left').val();
+        var positionBottom = $('#acb_position_bottom').val();
+        var borderRadius = $('#acb_border_radius').val();
+        
+        $('.acb-admin-preview').css({
+            'width': iconSize + 'px',
+            'height': iconSize + 'px',
+            'opacity': opacity,
+            'left': positionLeft + 'px',
+            'bottom': positionBottom + 'px',
+            'border-radius': borderRadius + 'px'
+        });
+    }
+    
+    // 設定値変更時にリアルタイムでプレビュー更新
+    $('#acb_icon_size, #acb_opacity, #acb_position_left, #acb_position_bottom, #acb_border_radius').on('input', updatePreview);
+});
+</script>

@@ -1,0 +1,193 @@
+/**
+ * Amazon Corner Buddy Styles
+ * ページ左下角のAmazonアイコンのアニメーション定義
+ */
+
+/* ベースアイコンスタイル */
+#acb-corner-buddy {
+    position: fixed !important;
+    bottom: 20px !important;
+    left: 20px !important;
+    z-index: 9999 !important;
+    display: block !important;
+    text-decoration: none !important;
+    border: none !important;
+    outline: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    transition: all 0.3s ease !important;
+    cursor: pointer !important;
+}
+
+/* ホバー効果 */
+#acb-corner-buddy:hover {
+    transform: scale(1.1) !important;
+    opacity: 1 !important;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)) !important;
+}
+
+#acb-corner-buddy:active {
+    transform: scale(0.95) !important;
+}
+
+#acb-corner-buddy img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: inherit !important;
+}
+
+/* アニメーション定義 */
+
+/* 1. Shake - 軽い揺れ */
+@keyframes acb-shake {
+    0%, 100% { transform: translateX(0); }
+    10% { transform: translateX(-2px) rotate(-1deg); }
+    20% { transform: translateX(2px) rotate(1deg); }
+    30% { transform: translateX(-1px) rotate(-0.5deg); }
+    40% { transform: translateX(1px) rotate(0.5deg); }
+    50% { transform: translateX(-0.5px) rotate(-0.2deg); }
+    60% { transform: translateX(0.5px) rotate(0.2deg); }
+    70% { transform: translateX(-0.2px) rotate(-0.1deg); }
+    80% { transform: translateX(0.2px) rotate(0.1deg); }
+    90% { transform: translateX(0) rotate(0); }
+}
+
+/* 2. Bounce - 軽い跳ねる動き */
+@keyframes acb-bounce {
+    0%, 100% { transform: translateY(0); }
+    25% { transform: translateY(-8px); }
+    50% { transform: translateY(-4px); }
+    75% { transform: translateY(-2px); }
+}
+
+/* 3. Wiggle - くねくね動き */
+@keyframes acb-wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    12.5% { transform: rotate(3deg) scale(1.02); }
+    25% { transform: rotate(-3deg) scale(1.04); }
+    37.5% { transform: rotate(2deg) scale(1.02); }
+    50% { transform: rotate(-2deg) scale(1.01); }
+    62.5% { transform: rotate(1deg) scale(1.02); }
+    75% { transform: rotate(-1deg) scale(1.01); }
+    87.5% { transform: rotate(0.5deg) scale(1.005); }
+}
+
+/* 4. Pulse - 拡大縮小 */
+@keyframes acb-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.1); opacity: 1; }
+}
+
+/* 5. Rotate - 回転 */
+@keyframes acb-rotate {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(5deg) scale(1.05); }
+    50% { transform: rotate(0deg) scale(1.1); }
+    75% { transform: rotate(-5deg) scale(1.05); }
+    100% { transform: rotate(0deg) scale(1); }
+}
+
+/* 6. Float - ふわふわ浮遊 */
+@keyframes acb-float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    25% { transform: translateY(-6px) rotate(1deg); }
+    50% { transform: translateY(-12px) rotate(0deg); }
+    75% { transform: translateY(-6px) rotate(-1deg); }
+}
+
+/* アニメーションクラス */
+.acb-animation-shake {
+    animation: acb-shake 1.5s ease-in-out !important;
+}
+
+.acb-animation-bounce {
+    animation: acb-bounce 1.2s ease-out !important;
+}
+
+.acb-animation-wiggle {
+    animation: acb-wiggle 2s ease-in-out !important;
+}
+
+.acb-animation-pulse {
+    animation: acb-pulse 1.8s ease-in-out !important;
+}
+
+.acb-animation-rotate {
+    animation: acb-rotate 2.2s ease-in-out !important;
+}
+
+.acb-animation-float {
+    animation: acb-float 2.5s ease-in-out !important;
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+    #acb-corner-buddy {
+        bottom: 15px !important;
+        left: 15px !important;
+    }
+    
+    /* モバイルではアニメーションを少し控えめに */
+    .acb-animation-shake {
+        animation-duration: 1s !important;
+    }
+    
+    .acb-animation-bounce {
+        animation-duration: 0.8s !important;
+    }
+    
+    .acb-animation-wiggle {
+        animation-duration: 1.5s !important;
+    }
+    
+    .acb-animation-pulse {
+        animation-duration: 1.2s !important;
+    }
+    
+    .acb-animation-rotate {
+        animation-duration: 1.5s !important;
+    }
+    
+    .acb-animation-float {
+        animation-duration: 2s !important;
+    }
+}
+
+/* 超小さいスクリーン用 */
+@media (max-width: 480px) {
+    #acb-corner-buddy {
+        bottom: 10px !important;
+        left: 10px !important;
+    }
+}
+
+/* アクセシビリティ：アニメーション無効化設定に対応 */
+@media (prefers-reduced-motion: reduce) {
+    .acb-animation-shake,
+    .acb-animation-bounce,
+    .acb-animation-wiggle,
+    .acb-animation-pulse,
+    .acb-animation-rotate,
+    .acb-animation-float {
+        animation: none !important;
+    }
+    
+    /* 代替として軽い点滅のみ */
+    #acb-corner-buddy {
+        animation: acb-subtle-blink 3s ease-in-out infinite !important;
+    }
+}
+
+@keyframes acb-subtle-blink {
+    0%, 90%, 100% { opacity: 0.8; }
+    95% { opacity: 0.6; }
+}

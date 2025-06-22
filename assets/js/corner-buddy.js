@@ -90,6 +90,48 @@
             };
         }
 
+        // 吹き出しの位置を動的計算
+        calculateSpeechBubblePosition() {
+            if (!this.speechBubble || !this.speechBubble.length || !this.element || !this.element.length) {
+                return;
+            }
+
+            // アイコンサイズを取得（設定値またはCSS値）
+            const iconSize = this.settings.icon_size || parseInt(this.element.width()) || 50;
+            
+            // 吹き出しの幅を取得（まだ表示されていない場合は仮表示して取得）
+            const wasVisible = this.speechBubble.is(':visible');
+            if (!wasVisible) {
+                this.speechBubble.css({
+                    'visibility': 'hidden',
+                    'display': 'block'
+                });
+            }
+            
+            const bubbleWidth = this.speechBubble.outerWidth() || 180; // フォールバック値
+            
+            if (!wasVisible) {
+                this.speechBubble.css({
+                    'visibility': 'visible',
+                    'display': 'none'
+                });
+            }
+
+            // アイコン左端から吹き出しが始まるように計算
+            // 吹き出し幅 - アイコン幅 = 左にずらす距離
+            let leftPosition = -(bubbleWidth - iconSize * 0.1); // アイコン左端から少し内側
+            
+            // 画面端からのはみ出しを防ぐ
+            const iconLeft = parseInt(this.element.css('left')) || 20;
+            const minLeft = -iconLeft + 10; // 画面左端から10px余裕
+            leftPosition = Math.max(leftPosition, minLeft);
+            
+            // 吹き出しに位置を適用
+            this.speechBubble.css('left', leftPosition + 'px');
+            
+            console.log(`Amazon Corner Buddy: Speech bubble position calculated - Icon: ${iconSize}px, Bubble: ${bubbleWidth}px, Left: ${leftPosition}px`);
+        }
+
         // 吹き出し要素のセットアップ
         setupSpeechBubble() {
             if (!this.element || this.element.length === 0) return;
@@ -97,6 +139,11 @@
             // 吹き出し要素を作成
             this.speechBubble = $('<div id="acb-speech-bubble"></div>');
             this.element.append(this.speechBubble);
+            
+            // 位置を計算
+            setTimeout(() => {
+                this.calculateSpeechBubblePosition();
+            }, 100); // DOM更新後に実行
         }
 
         setupElement() {
@@ -127,6 +174,11 @@
                 'bottom': this.settings.position_bottom + 'px',
                 'left': this.settings.position_left + 'px'
             });
+            
+            // 吹き出し位置を再計算（アイコンサイズ変更時）
+            setTimeout(() => {
+                this.calculateSpeechBubblePosition();
+            }, 50); // CSS適用後に実行
         }
 
         startAnimationTimer() {
@@ -297,6 +349,11 @@
         updateSettings(newSettings) {
             this.settings = { ...this.settings, ...newSettings };
             this.applySettings();
+            
+            // 吹き出し位置を再計算（設定変更時）
+            setTimeout(() => {
+                this.calculateSpeechBubblePosition();
+            }, 100);
             
             // タイマーを再設定
             if (newSettings.animation_interval) {

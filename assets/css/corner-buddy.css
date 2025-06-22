@@ -198,7 +198,7 @@
 #acb-speech-bubble {
     position: absolute !important;
     top: -45px !important;
-    left: 70px !important;
+    left: 0px !important;
     background: linear-gradient(145deg, #ff9500, #ff7700) !important;
     color: white !important;
     padding: 8px 12px !important;
@@ -270,7 +270,7 @@
         font-size: 11px !important;
         padding: 6px 10px !important;
         top: -40px !important;
-        left: 55px !important;
+        left: 0px !important;
         max-width: 150px !important;
         border-radius: 10px !important;
     }
@@ -290,7 +290,7 @@
         font-size: 10px !important;
         padding: 5px 8px !important;
         top: -35px !important;
-        left: 45px !important;
+        left: 0px !important;
         max-width: 160px !important;
         white-space: nowrap !important;
         /* 画面からはみ出る場合のスクロール防止 */

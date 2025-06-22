@@ -98,7 +98,9 @@ class Amazon_Corner_Buddy {
             'position_left' => $this->get_option('position_left', 20),
             'border_radius' => $this->get_option('border_radius', 12),
             'icon_url' => ACB_PLUGIN_URL . 'assets/images/amazon-icon.svg',
-            'link_url' => $this->get_option('link_url', 'https://amzn.to/446mmWI')
+            'link_url' => $this->get_option('link_url', 'https://amzn.to/446mmWI'),
+            'speech_bubble_enabled' => $this->get_option('speech_bubble_enabled', true),
+            'speech_bubble_frequency' => $this->get_option('speech_bubble_frequency', 6)
         ));
     }
     
@@ -259,6 +261,8 @@ class Amazon_Corner_Buddy {
         $sanitized['position_left'] = max(0, min(500, intval($input['position_left'])));
         $sanitized['border_radius'] = max(0, min(50, intval($input['border_radius'])));
         $sanitized['link_url'] = esc_url_raw($input['link_url']);
+        $sanitized['speech_bubble_enabled'] = isset($input['speech_bubble_enabled']) ? (bool) $input['speech_bubble_enabled'] : false;
+        $sanitized['speech_bubble_frequency'] = max(3, min(10, intval($input['speech_bubble_frequency'])));
         
         return $sanitized;
     }

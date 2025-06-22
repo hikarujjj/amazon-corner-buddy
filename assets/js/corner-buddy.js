@@ -25,6 +25,9 @@
             this.element = null;
             this.animationTimer = null;
             this.settings = {};
+            this.speechBubble = null;
+            this.animationCount = 0;
+            this.speechBubbleTimer = null;
             
             this.init();
         }
@@ -33,8 +36,49 @@
             // DOMが読み込まれたら開始
             $(document).ready(() => {
                 this.setupElement();
+                this.setupSpeechBubble();
                 this.startAnimationTimer();
             });
+        }
+
+        // 時間帯別挨拶メッセージ定義
+        getGreetingMessages() {
+            const hour = new Date().getHours();
+            
+            if (hour >= 5 && hour < 10) {
+                // 朝 (5:00-9:59)
+                return {
+                    greeting: ["おはようございます☀️", "素敵な一日の始まりですね", "今日も頑張りましょう✨"],
+                    cta: ["お得な商品をチェック！", "新商品が入荷しています", "朝の特別セールあります"]
+                };
+            } else if (hour >= 10 && hour < 15) {
+                // 昼 (10:00-14:59)
+                return {
+                    greeting: ["こんにちは😊", "お疲れ様です", "午後もお疲れ様"],
+                    cta: ["ランチタイムセール中！", "お買い物はお済みですか？", "今だけ特別価格です"]
+                };
+            } else if (hour >= 15 && hour < 19) {
+                // 夕方 (15:00-18:59)
+                return {
+                    greeting: ["お疲れ様です🌅", "夕方になりましたね", "今日もお疲れ様でした"],
+                    cta: ["帰宅前にチェック！", "夜のお得情報あります", "限定セール開催中"]
+                };
+            } else {
+                // 夜 (19:00-4:59)
+                return {
+                    greeting: ["今日もお疲れ様でした🌙", "おつかれさまです", "ゆっくりお過ごしください"],
+                    cta: ["お買い物は済みましたか？", "夜のタイムセール中！", "明日の準備はいかがですか？"]
+                };
+            }
+        }
+
+        // 吹き出し要素のセットアップ
+        setupSpeechBubble() {
+            if (!this.element || this.element.length === 0) return;
+
+            // 吹き出し要素を作成
+            this.speechBubble = $('<div id="acb-speech-bubble"></div>');
+            this.element.append(this.speechBubble);
         }
 
         setupElement() {
@@ -98,6 +142,7 @@
             }
 
             isAnimating = true;
+            this.animationCount++;
 
             // ランダムアニメーション選択
             const randomAnimation = animations[Math.floor(Math.random() * animations.length)];
@@ -109,6 +154,18 @@
 
             // 新しいアニメーションクラスを追加
             this.element.addClass(randomAnimation);
+
+            // 設定された頻度で吹き出しを表示（設定で無効の場合は表示しない）
+            const speechBubbleEnabled = this.settings.speech_bubble_enabled !== false;
+            const frequency = this.settings.speech_bubble_frequency || 6;
+            const shouldShowBubble = speechBubbleEnabled && (this.animationCount % frequency === 0);
+            
+            if (shouldShowBubble) {
+                // アニメーション開始から少し遅れて吹き出し表示
+                setTimeout(() => {
+                    this.showSpeechBubble();
+                }, 500);
+            }
 
             // アニメーション完了後にクラスを削除
             this.element.one('animationend', () => {
@@ -125,6 +182,52 @@
             }, 3000);
         }
 
+        // ２段階吹き出し表示
+        showSpeechBubble() {
+            if (!this.speechBubble || !this.speechBubble.length) return;
+
+            // アクセシビリティ設定チェック
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                return;
+            }
+
+            const messages = this.getGreetingMessages();
+            const greetingMsg = messages.greeting[Math.floor(Math.random() * messages.greeting.length)];
+            const ctaMsg = messages.cta[Math.floor(Math.random() * messages.cta.length)];
+
+            // 第1段階：挨拶表示
+            this.speechBubble.text(greetingMsg);
+            this.speechBubble.removeClass('acb-second-phase acb-fade-out acb-pulse');
+            this.speechBubble.addClass('acb-show');
+
+            // 第2段階：CTA表示（3秒後）
+            setTimeout(() => {
+                if (this.speechBubble && this.speechBubble.hasClass('acb-show')) {
+                    this.speechBubble.text(ctaMsg);
+                    this.speechBubble.addClass('acb-second-phase acb-pulse');
+                }
+            }, 3000);
+
+            // フェードアウト（5秒後）
+            setTimeout(() => {
+                if (this.speechBubble && this.speechBubble.hasClass('acb-show')) {
+                    this.speechBubble.addClass('acb-fade-out');
+                    
+                    // 完全に消去（1.5秒後）
+                    setTimeout(() => {
+                        this.speechBubble.removeClass('acb-show acb-second-phase acb-fade-out acb-pulse');
+                    }, 1500);
+                }
+            }, 5000);
+        }
+
+        // 吹き出しを手動で非表示
+        hideSpeechBubble() {
+            if (this.speechBubble && this.speechBubble.length) {
+                this.speechBubble.removeClass('acb-show acb-second-phase acb-fade-out acb-pulse');
+            }
+        }
+
         removeAllAnimationClasses() {
             animations.forEach(animationClass => {
                 this.element.removeClass(animationClass);
@@ -136,6 +239,11 @@
             this.performRandomAnimation();
         }
 
+        // 手動で吹き出し表示（デバッグ用）
+        triggerSpeechBubble() {
+            this.showSpeechBubble();
+        }
+
         // アニメーション停止
         stopAnimations() {
             if (this.animationTimer) {
@@ -143,6 +251,7 @@
                 this.animationTimer = null;
             }
             this.removeAllAnimationClasses();
+            this.hideSpeechBubble();
             isAnimating = false;
         }
 

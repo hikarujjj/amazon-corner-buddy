@@ -125,11 +125,12 @@ class Amazon_Corner_Buddy {
         wp_localize_script('acb-frontend-script', 'acb_vars', array(
             'animation_interval' => $this->get_option('animation_interval', 10) * 1000, // ミリ秒に変換
             'icon_size' => $this->get_option('icon_size', 48),
+            'icon_size_pc' => $this->get_option('icon_size_pc', 64),
             'opacity' => $this->get_option('opacity', 0.8),
             'position_bottom' => $this->get_option('position_bottom', 20),
             'position_left' => $this->get_option('position_left', 20),
             'border_radius' => $this->get_option('border_radius', 12),
-            'icon_url' => ACB_PLUGIN_URL . 'assets/images/amazon-icon.svg',
+            'icon_url' => ACB_PLUGIN_URL . 'assets/images/prime-day.png',
             'link_url' => $this->get_option('link_url', 'https://amzn.to/446mmWI'),
             'speech_bubble_enabled' => $this->get_option('speech_bubble_enabled', true),
             'speech_bubble_frequency' => $this->get_option('speech_bubble_frequency', 3),
@@ -186,7 +187,7 @@ class Amazon_Corner_Buddy {
             transition: all 0.3s ease;
             cursor: pointer;
         ">
-            <img src="' . esc_url(ACB_PLUGIN_URL . 'assets/images/amazon-icon.svg') . '" 
+            <img src="' . esc_url(ACB_PLUGIN_URL . 'assets/images/prime-day.png') . '" 
                  alt="Amazon Corner Buddy" 
                  style="width: 100%; height: 100%; object-fit: contain; border: none; display: block;">
         </a>';
@@ -289,6 +290,7 @@ class Amazon_Corner_Buddy {
         $sanitized['enabled'] = isset($input['enabled']) ? (bool) $input['enabled'] : false;
         $sanitized['animation_interval'] = max(1, min(60, intval($input['animation_interval'])));
         $sanitized['icon_size'] = max(20, min(100, intval($input['icon_size'])));
+        $sanitized['icon_size_pc'] = max(30, min(150, intval($input['icon_size_pc'])));
         $sanitized['opacity'] = max(0.1, min(1.0, floatval($input['opacity'])));
         $sanitized['position_bottom'] = max(0, min(500, intval($input['position_bottom'])));
         $sanitized['position_left'] = max(0, min(500, intval($input['position_left'])));

@@ -3,8 +3,8 @@
  * Plugin Name: Amazon Corner Buddy
  * Plugin URI: https://github.com/amazon-corner-buddy
  * Description: ページの左下角でAmazonアイコンが密かにアニメーションする可愛いプラグイン
- * Version: 1.0.0
- * Author: Amazon Corner Buddy Team
+ * Version: 2.0.0
+ * Author: buchi
  * Author URI: https://github.com/amazon-corner-buddy
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html

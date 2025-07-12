@@ -18,6 +18,7 @@ if (isset($_POST['submit']) && check_admin_referer('acb_settings_nonce')) {
         'enabled' => isset($_POST['acb_options']['enabled']) ? true : false,
         'animation_interval' => max(1, min(60, intval($_POST['acb_options']['animation_interval']))),
         'icon_size' => max(20, min(100, intval($_POST['acb_options']['icon_size']))),
+        'icon_size_pc' => max(30, min(150, intval($_POST['acb_options']['icon_size_pc']))),
         'opacity' => max(0.1, min(1.0, floatval($_POST['acb_options']['opacity']))),
         'position_bottom' => max(0, min(500, intval($_POST['acb_options']['position_bottom']))),
         'position_left' => max(0, min(500, intval($_POST['acb_options']['position_left']))),
@@ -127,6 +128,7 @@ $options = get_option('acb_options', array());
 $enabled = isset($options['enabled']) ? $options['enabled'] : true;
 $animation_interval = isset($options['animation_interval']) ? $options['animation_interval'] : 10;
 $icon_size = isset($options['icon_size']) ? $options['icon_size'] : 48;
+$icon_size_pc = isset($options['icon_size_pc']) ? $options['icon_size_pc'] : 64;
 $opacity = isset($options['opacity']) ? $options['opacity'] : 0.8;
 $position_bottom = isset($options['position_bottom']) ? $options['position_bottom'] : 20;
 $position_left = isset($options['position_left']) ? $options['position_left'] : 20;
@@ -202,10 +204,18 @@ $custom_messages = isset($options['custom_messages']) ? $options['custom_message
                             </td>
                         </tr>
                         
-                        <!-- アイコンサイズ -->
+                        <!-- アイコンサイズ設定 -->
+                        <tr>
+                            <th scope="row" colspan="2">
+                                <h3 style="margin: 30px 0 10px 0; color: #0073aa;">📱 アイコンサイズ設定</h3>
+                                <p style="color: #666; margin-bottom: 20px;">PC表示とモバイル表示で異なるサイズを設定できます。</p>
+                            </th>
+                        </tr>
+                        
+                        <!-- モバイル表示サイズ -->
                         <tr>
                             <th scope="row">
-                                <label for="acb_icon_size">アイコンサイズ</label>
+                                <label for="acb_icon_size">📱 モバイル表示サイズ</label>
                             </th>
                             <td>
                                 <input type="number" 
@@ -215,7 +225,24 @@ $custom_messages = isset($options['custom_messages']) ? $options['custom_message
                                        min="20" 
                                        max="100" 
                                        style="width: 80px;"> px
-                                <p class="description">アイコンのサイズを設定します（20-100px）。</p>
+                                <p class="description">モバイル端末（768px以下）でのアイコンサイズを設定します（20-100px）。</p>
+                            </td>
+                        </tr>
+                        
+                        <!-- PC表示サイズ -->
+                        <tr>
+                            <th scope="row">
+                                <label for="acb_icon_size_pc">💻 PC表示サイズ</label>
+                            </th>
+                            <td>
+                                <input type="number" 
+                                       id="acb_icon_size_pc" 
+                                       name="acb_options[icon_size_pc]" 
+                                       value="<?php echo esc_attr($icon_size_pc); ?>" 
+                                       min="30" 
+                                       max="150" 
+                                       style="width: 80px;"> px
+                                <p class="description">PC画面（769px以上）でのアイコンサイズを設定します（30-150px）。</p>
                             </td>
                         </tr>
                         
@@ -498,28 +525,59 @@ $custom_messages = isset($options['custom_messages']) ? $options['custom_message
             <!-- プレビューエリア -->
             <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                 <h3 style="margin-top: 0;">プレビュー</h3>
-                <div style="position: relative; background: #fff; border: 2px dashed #ddd; height: 200px; border-radius: 4px;">
-                    <div class="acb-admin-preview" style="position: absolute; 
-                               bottom: <?php echo esc_attr($position_bottom); ?>px; 
-                               left: <?php echo esc_attr($position_left); ?>px; 
-                               width: <?php echo esc_attr($icon_size); ?>px; 
-                               height: <?php echo esc_attr($icon_size); ?>px; 
-                               opacity: <?php echo esc_attr($opacity); ?>; 
-                               background: #232f3e; 
-                               border-radius: <?php echo esc_attr($border_radius); ?>px; 
-                               display: flex; 
-                               align-items: center; 
-                               justify-content: center; 
-                               color: white; 
-                               font-weight: bold;">
-                        a
-                    </div>
-                    <div style="position: absolute; bottom: 5px; right: 5px; font-size: 12px; color: #666;">
-                        プレビュー表示
+                
+                <!-- PCプレビュー -->
+                <div style="margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #0073aa;">💻 PC表示 (769px以上)</h4>
+                    <div style="position: relative; background: #fff; border: 2px dashed #ddd; height: 150px; border-radius: 4px;">
+                        <div class="acb-admin-preview-pc" style="position: absolute; 
+                                   bottom: <?php echo esc_attr($position_bottom); ?>px; 
+                                   left: <?php echo esc_attr($position_left); ?>px; 
+                                   width: <?php echo esc_attr($icon_size_pc); ?>px; 
+                                   height: <?php echo esc_attr($icon_size_pc); ?>px; 
+                                   opacity: <?php echo esc_attr($opacity); ?>; 
+                                   background: #232f3e; 
+                                   border-radius: <?php echo esc_attr($border_radius); ?>px; 
+                                   display: flex; 
+                                   align-items: center; 
+                                   justify-content: center; 
+                                   color: white; 
+                                   font-weight: bold;">
+                            a
+                        </div>
+                        <div style="position: absolute; bottom: 5px; right: 5px; font-size: 12px; color: #666;">
+                            PCプレビュー
+                        </div>
                     </div>
                 </div>
-                <p style="font-size: 12px; color: #666; margin-bottom: 0;">
-                    実際のサイトでのおおよその表示位置です。
+                
+                <!-- モバイルプレビュー -->
+                <div>
+                    <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #d63384;">📱 モバイル表示 (768px以下)</h4>
+                    <div style="position: relative; background: #fff; border: 2px dashed #ddd; height: 120px; border-radius: 4px;">
+                        <div class="acb-admin-preview-mobile" style="position: absolute; 
+                                   bottom: <?php echo esc_attr($position_bottom); ?>px; 
+                                   left: <?php echo esc_attr($position_left); ?>px; 
+                                   width: <?php echo esc_attr($icon_size); ?>px; 
+                                   height: <?php echo esc_attr($icon_size); ?>px; 
+                                   opacity: <?php echo esc_attr($opacity); ?>; 
+                                   background: #232f3e; 
+                                   border-radius: <?php echo esc_attr($border_radius); ?>px; 
+                                   display: flex; 
+                                   align-items: center; 
+                                   justify-content: center; 
+                                   color: white; 
+                                   font-weight: bold;">
+                            a
+                        </div>
+                        <div style="position: absolute; bottom: 5px; right: 5px; font-size: 12px; color: #666;">
+                            モバイルプレビュー
+                        </div>
+                    </div>
+                </div>
+                
+                <p style="font-size: 12px; color: #666; margin: 10px 0 0 0;">
+                    実際のサイトでのおおよその表示サイズです。
                 </p>
             </div>
             
@@ -574,12 +632,24 @@ jQuery(document).ready(function($) {
     // ライブプレビュー機能
     function updatePreview() {
         var iconSize = $('#acb_icon_size').val();
+        var iconSizePc = $('#acb_icon_size_pc').val();
         var opacity = $('#acb_opacity').val();
         var positionLeft = $('#acb_position_left').val();
         var positionBottom = $('#acb_position_bottom').val();
         var borderRadius = $('#acb_border_radius').val();
         
-        $('.acb-admin-preview').css({
+        // PCプレビュー更新
+        $('.acb-admin-preview-pc').css({
+            'width': iconSizePc + 'px',
+            'height': iconSizePc + 'px',
+            'opacity': opacity,
+            'left': positionLeft + 'px',
+            'bottom': positionBottom + 'px',
+            'border-radius': borderRadius + 'px'
+        });
+        
+        // モバイルプレビュー更新
+        $('.acb-admin-preview-mobile').css({
             'width': iconSize + 'px',
             'height': iconSize + 'px',
             'opacity': opacity,
@@ -649,7 +719,7 @@ jQuery(document).ready(function($) {
     }
     
     // 設定値変更時にリアルタイムでプレビュー更新
-    $('#acb_icon_size, #acb_opacity, #acb_position_left, #acb_position_bottom, #acb_border_radius').on('input', updatePreview);
+    $('#acb_icon_size, #acb_icon_size_pc, #acb_opacity, #acb_position_left, #acb_position_bottom, #acb_border_radius').on('input', updatePreview);
     
     // 文字数カウンター初期化
     setupCharCounters();

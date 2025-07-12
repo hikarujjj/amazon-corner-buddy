@@ -38,6 +38,21 @@
                 this.setupElement();
                 this.setupSpeechBubble();
                 this.startAnimationTimer();
+                this.setupResizeListener();
+            });
+        }
+        
+        // リサイズイベントリスナーを設定
+        setupResizeListener() {
+            let resizeTimeout;
+            
+            $(window).on('resize', () => {
+                // デバウンシングでパフォーマンスを最適化
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    this.applySettings();
+                    console.log('Amazon Corner Buddy: Window resized, updated icon size');
+                }, 150);
             });
         }
 
@@ -96,8 +111,8 @@
                 return;
             }
 
-            // アイコンサイズを取得（設定値またはCSS値）
-            const iconSize = this.settings.icon_size || parseInt(this.element.width()) || 50;
+            // アイコンサイズを取得（レスポンシブ対応）
+            const iconSize = this.getCurrentIconSize();
             
             // 吹き出しの幅を取得（まだ表示されていない場合は仮表示して取得）
             const wasVisible = this.speechBubble.is(':visible');
@@ -174,17 +189,33 @@
             console.log('Amazon Corner Buddy: Initialized successfully');
         }
 
+        // 現在の画面サイズに応じた適切なアイコンサイズを取得
+        getCurrentIconSize() {
+            const screenWidth = window.innerWidth || document.documentElement.clientWidth;
+            const isMobile = screenWidth <= 768;
+            
+            if (isMobile) {
+                return this.settings.icon_size || 48; // モバイル用サイズ
+            } else {
+                return this.settings.icon_size_pc || this.settings.icon_size || 64; // PC用サイズ（フォールバック対応）
+            }
+        }
+
         applySettings() {
             if (!this.element || this.element.length === 0) return;
 
+            const currentIconSize = this.getCurrentIconSize();
+            
             // 設定を適用
             this.element.css({
-                'width': this.settings.icon_size + 'px',
-                'height': this.settings.icon_size + 'px',
+                'width': currentIconSize + 'px',
+                'height': currentIconSize + 'px',
                 'opacity': this.settings.opacity,
                 'bottom': this.settings.position_bottom + 'px',
                 'left': this.settings.position_left + 'px'
             });
+            
+            console.log(`Amazon Corner Buddy: Applied responsive size - Screen: ${window.innerWidth}px, Icon: ${currentIconSize}px`);
             
             // 吹き出し位置を再計算（アイコンサイズ変更時）
             setTimeout(() => {

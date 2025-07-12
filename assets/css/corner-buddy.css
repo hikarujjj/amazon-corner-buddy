@@ -330,32 +330,32 @@
 /* スワイプインジケーター（矢印マーク） */
 #acb-swipe-indicator {
     position: fixed !important;
-    left: 3px !important;
+    left: 2px !important;
     bottom: 65px !important; /* バナー中心高さ（PC: 90px/2 + 20px = 65px） */
-    width: 24px !important;
-    height: 24px !important;
-    background: linear-gradient(45deg, #ff9500, #ff7700) !important;
-    border-radius: 50% !important;
+    width: 40px !important;
+    height: 40px !important;
+    background: transparent !important;
     opacity: 0 !important;
     transform: scale(0.8) !important;
     transition: all 0.3s ease !important;
     cursor: pointer !important;
     z-index: 10000 !important;
-    box-shadow: 0 2px 8px rgba(255, 149, 0, 0.3) !important;
     display: none !important;
 }
 
-/* 矢印マークの中の三角矢印 */
+/* 二重矢印（≫）アイコン */
 #acb-swipe-indicator::after {
-    content: '' !important;
+    content: '≫' !important;
     position: absolute !important;
     top: 50% !important;
     left: 50% !important;
-    transform: translate(-40%, -50%) !important;
-    width: 0 !important;
-    height: 0 !important;
-    border: 5px solid transparent !important;
-    border-left: 8px solid white !important;
+    transform: translate(-50%, -50%) !important;
+    font-size: 24px !important;
+    font-weight: bold !important;
+    color: #ff9500 !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3) !important;
+    font-family: Arial, sans-serif !important;
+    line-height: 1 !important;
 }
 
 /* インジケーター表示状態 */
@@ -367,9 +367,14 @@
 
 /* インジケーターホバー効果 */
 #acb-swipe-indicator:hover {
-    transform: scale(1.1) !important;
+    transform: scale(1.15) !important;
     opacity: 1 !important;
-    box-shadow: 0 4px 12px rgba(255, 149, 0, 0.4) !important;
+}
+
+#acb-swipe-indicator:hover::after {
+    color: #ff7700 !important;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4) !important;
+    transform: translate(-50%, -50%) scale(1.05) !important;
 }
 
 /* インジケータータップ効果 */
@@ -377,27 +382,45 @@
     transform: scale(0.9) !important;
 }
 
-/* インジケーターパルス効果 */
-@keyframes acb-indicator-pulse {
-    0%, 100% { transform: scale(1); opacity: 0.9; }
-    50% { transform: scale(1.05); opacity: 1; }
+#acb-swipe-indicator:active::after {
+    color: #ff6600 !important;
+    transform: translate(-50%, -50%) scale(0.95) !important;
+}
+
+/* インジケーター スライドアニメーション */
+@keyframes acb-indicator-slide {
+    0%, 100% { 
+        transform: translateX(0px) scale(0.8);
+        opacity: 0.8;
+    }
+    25% { 
+        transform: translateX(6px) scale(0.85);
+        opacity: 0.9;
+    }
+    50% { 
+        transform: translateX(10px) scale(0.9);
+        opacity: 1;
+    }
+    75% { 
+        transform: translateX(6px) scale(0.85);
+        opacity: 0.9;
+    }
 }
 
 #acb-swipe-indicator.acb-pulse {
-    animation: acb-indicator-pulse 1.5s ease-in-out infinite !important;
+    animation: acb-indicator-slide 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
 }
 
 /* モバイル対応のインジケーター */
 @media (max-width: 768px) {
     #acb-swipe-indicator {
         bottom: 45px !important; /* モバイル: 60px/2 + 15px = 45px */
-        width: 20px !important;
-        height: 20px !important;
+        width: 32px !important;
+        height: 32px !important;
     }
     
     #acb-swipe-indicator::after {
-        border: 4px solid transparent !important;
-        border-left: 6px solid white !important;
+        font-size: 20px !important;
     }
 }
 
@@ -405,13 +428,12 @@
 @media (max-width: 480px) {
     #acb-swipe-indicator {
         bottom: 32px !important; /* 超小型: 45px/2 + 10px = 32px */
-        width: 18px !important;
-        height: 18px !important;
+        width: 28px !important;
+        height: 28px !important;
     }
     
     #acb-swipe-indicator::after {
-        border: 3px solid transparent !important;
-        border-left: 5px solid white !important;
+        font-size: 18px !important;
     }
 }
 
@@ -432,6 +454,14 @@
     
     #acb-swipe-indicator:hover {
         transform: none !important;
+    }
+    
+    #acb-swipe-indicator:hover::after {
+        transform: translate(-50%, -50%) !important;
+    }
+    
+    #acb-swipe-indicator:active::after {
+        transform: translate(-50%, -50%) !important;
     }
     
     .acb-pulse {

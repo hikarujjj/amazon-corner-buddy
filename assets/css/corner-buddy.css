@@ -377,6 +377,19 @@
     transform: translate(-50%, -50%) scale(1.05) !important;
 }
 
+/* PC版用キーボードフォーカス */
+#acb-swipe-indicator:focus {
+    outline: 2px solid #ff9500 !important;
+    outline-offset: 2px !important;
+    transform: scale(1.1) !important;
+    opacity: 1 !important;
+}
+
+#acb-swipe-indicator:focus::after {
+    color: #ff7700 !important;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4) !important;
+}
+
 /* インジケータータップ効果 */
 #acb-swipe-indicator:active {
     transform: scale(0.9) !important;
@@ -485,6 +498,19 @@
     color: #ff7700 !important;
     text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4) !important;
     transform: translate(-50%, -50%) scale(1.05) !important;
+}
+
+/* PC版用キーボードフォーカス */
+#acb-hide-indicator:focus {
+    outline: 2px solid #ff9500 !important;
+    outline-offset: 2px !important;
+    transform: scale(1.1) !important;
+    opacity: 1 !important;
+}
+
+#acb-hide-indicator:focus::after {
+    color: #ff7700 !important;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4) !important;
 }
 
 /* 隠すインジケータータップ効果 */

@@ -46,7 +46,7 @@
             $(document).ready(() => {
                 this.setupElement();
                 this.setupSpeechBubble();
-                this.setupSwipeFeature();
+                this.setupHideFeature();
                 this.startAnimationTimer();
                 this.setupResizeListener();
             });
@@ -61,19 +61,19 @@
                 clearTimeout(resizeTimeout);
                 resizeTimeout = setTimeout(() => {
                     this.applySettings();
-                    this.updateSwipeFeatureOnResize();
+                    this.updateHideFeatureOnResize();
                     console.log('Amazon Corner Buddy: Window resized, updated layout');
                 }, 150);
             });
         }
 
-        // リサイズ時のスワイプ機能更新
-        updateSwipeFeatureOnResize() {
+        // リサイズ時の隠し機能更新
+        updateHideFeatureOnResize() {
             const isMobile = window.innerWidth <= 768;
-            const swipeEnabled = this.settings.swipe_hide_enabled !== false;
+            const hideEnabled = this.settings.swipe_hide_enabled !== false;
 
-            if (!isMobile || !swipeEnabled) {
-                // デスクトップに変更された場合、隠し状態を解除
+            if (!hideEnabled) {
+                // 隠し機能が無効の場合、隠し状態を解除
                 if (this.isSwipeHidden) {
                     this.isSwipeHidden = false;
                     this.element.removeClass('acb-swipe-hidden acb-swipe-transitioning');
@@ -82,12 +82,16 @@
                         this.swipeIndicator.removeClass('acb-show acb-pulse');
                     }
                     
-                    this.saveSwipeState();
-                    console.log('Amazon Corner Buddy: Swipe hidden state reset due to desktop view');
+                    if (this.hideIndicator) {
+                        this.hideIndicator.removeClass('acb-show acb-pulse');
+                    }
+                    
+                    this.saveHideState();
+                    console.log('Amazon Corner Buddy: Hide feature disabled, state reset');
                 }
             } else {
-                // モバイルの場合、スワイプ機能を再初期化
-                this.setupSwipeFeature();
+                // 隠し機能が有効な場合、再初期化
+                this.setupHideFeature();
             }
         }
 
@@ -208,49 +212,74 @@
             }, 100); // DOM更新後に実行
         }
 
-        // スワイプ機能のセットアップ
-        setupSwipeFeature() {
+        // バナー隠し機能のセットアップ（PC/モバイル共通）
+        setupHideFeature() {
             if (!this.element || this.element.length === 0) return;
 
-            // スワイプ機能が有効か確認（デフォルトは有効）
-            const swipeEnabled = this.settings.swipe_hide_enabled !== false;
-            if (!swipeEnabled) {
-                console.log('Amazon Corner Buddy: Swipe feature is disabled');
+            // バナー隠し機能が有効か確認（デフォルトは有効）
+            const hideEnabled = this.settings.swipe_hide_enabled !== false;
+            if (!hideEnabled) {
+                console.log('Amazon Corner Buddy: Hide feature is disabled');
                 return;
             }
 
-            // モバイル判定
-            const isMobile = window.innerWidth <= 768;
-            if (!isMobile) {
-                console.log('Amazon Corner Buddy: Swipe feature is only available on mobile');
-                return;
-            }
-
+            // インジケーター作成（PC/モバイル共通）
             this.createSwipeIndicator();
             this.createHideIndicator();
-            this.setupSwipeGestures();
-            this.loadSwipeState();
             
-            console.log('Amazon Corner Buddy: Swipe feature initialized');
+            // スワイプジェスチャーはモバイルのみ
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                this.setupSwipeGestures();
+                console.log('Amazon Corner Buddy: Mobile swipe gestures enabled');
+            } else {
+                console.log('Amazon Corner Buddy: PC click controls enabled');
+            }
+            
+            this.loadHideState();
+            
+            console.log('Amazon Corner Buddy: Hide feature initialized for ' + (isMobile ? 'mobile' : 'PC'));
         }
 
-        // スワイプインジケーター（矢印）を作成
+        // 復帰インジケーター（右矢印）を作成
         createSwipeIndicator() {
             if (this.swipeIndicator && this.swipeIndicator.length > 0) {
                 return; // 既に存在する場合は作成しない
             }
 
             this.swipeIndicator = $('<div id="acb-swipe-indicator"></div>');
+            
+            // PC版用のツールチップ追加
+            const isMobile = window.innerWidth <= 768;
+            if (!isMobile) {
+                this.swipeIndicator.attr('title', 'クリックでバナーを表示');
+                // キーボードアクセシビリティ
+                this.swipeIndicator.attr('tabindex', '0');
+                this.swipeIndicator.attr('role', 'button');
+                this.swipeIndicator.attr('aria-label', 'バナーを表示');
+            }
+            
             $('body').append(this.swipeIndicator);
 
-            // クリックイベントを設定
+            // クリック・タッチイベントを設定
             this.swipeIndicator.on('click touchstart', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 this.showBanner();
             });
+            
+            // PC版用キーボードイベント
+            if (!isMobile) {
+                this.swipeIndicator.on('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.showBanner();
+                    }
+                });
+            }
 
-            console.log('Amazon Corner Buddy: Swipe indicator created');
+            console.log('Amazon Corner Buddy: Restore indicator created for ' + (isMobile ? 'mobile' : 'PC'));
         }
 
         // 隠すインジケーター（左矢印）を作成
@@ -260,16 +289,38 @@
             }
 
             this.hideIndicator = $('<div id="acb-hide-indicator"></div>');
+            
+            // PC版用のツールチップ追加
+            const isMobile = window.innerWidth <= 768;
+            if (!isMobile) {
+                this.hideIndicator.attr('title', 'クリックでバナーを隠す');
+                // キーボードアクセシビリティ
+                this.hideIndicator.attr('tabindex', '0');
+                this.hideIndicator.attr('role', 'button');
+                this.hideIndicator.attr('aria-label', 'バナーを隠す');
+            }
+            
             $('body').append(this.hideIndicator);
 
-            // クリックイベントを設定
+            // クリック・タッチイベントを設定
             this.hideIndicator.on('click touchstart', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 this.hideBanner();
             });
+            
+            // PC版用キーボードイベント
+            if (!isMobile) {
+                this.hideIndicator.on('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.hideBanner();
+                    }
+                });
+            }
 
-            console.log('Amazon Corner Buddy: Hide indicator created');
+            console.log('Amazon Corner Buddy: Hide indicator created for ' + (isMobile ? 'mobile' : 'PC'));
         }
 
         // スワイプジェスチャーのセットアップ
@@ -411,17 +462,17 @@
             }, 400);
         }
 
-        // スワイプ状態を保存
-        saveSwipeState() {
+        // バナー隠し状態を保存
+        saveHideState() {
             try {
                 sessionStorage.setItem('acb_swipe_hidden', this.isSwipeHidden ? '1' : '0');
             } catch (e) {
-                console.warn('Amazon Corner Buddy: Could not save swipe state to sessionStorage');
+                console.warn('Amazon Corner Buddy: Could not save hide state to sessionStorage');
             }
         }
 
-        // スワイプ状態を読み込み
-        loadSwipeState() {
+        // バナー隠し状態を読み込み
+        loadHideState() {
             try {
                 const savedState = sessionStorage.getItem('acb_swipe_hidden');
                 if (savedState === '1') {
@@ -449,7 +500,7 @@
                     console.log('Amazon Corner Buddy: Hide indicator shown for visible banner');
                 }
             } catch (e) {
-                console.warn('Amazon Corner Buddy: Could not load swipe state from sessionStorage');
+                console.warn('Amazon Corner Buddy: Could not load hide state from sessionStorage');
             }
         }
 

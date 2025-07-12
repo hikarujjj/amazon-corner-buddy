@@ -437,30 +437,142 @@
     }
 }
 
+/* 隠すためのインジケーター（左矢印マーク） - バナー表示時用 */
+#acb-hide-indicator {
+    position: fixed !important;
+    left: 5px !important; /* バナーの左側に配置（画面内） */
+    bottom: 65px !important; /* バナー中心高さ（PC: 90px/2 + 20px = 65px） */
+    width: 40px !important;
+    height: 40px !important;
+    background: transparent !important;
+    opacity: 0 !important;
+    transform: scale(0.8) !important;
+    transition: all 0.3s ease !important;
+    cursor: pointer !important;
+    z-index: 10000 !important;
+    display: none !important;
+}
+
+/* 二重矢印（≪）アイコン */
+#acb-hide-indicator::after {
+    content: '≪' !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    font-size: 24px !important;
+    font-weight: bold !important;
+    color: #ff9500 !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3) !important;
+    font-family: Arial, sans-serif !important;
+    line-height: 1 !important;
+}
+
+/* 隠すインジケーター表示状態 */
+#acb-hide-indicator.acb-show {
+    opacity: 0.9 !important;
+    transform: scale(1) !important;
+    display: block !important;
+}
+
+/* 隠すインジケーターホバー効果 */
+#acb-hide-indicator:hover {
+    transform: scale(1.15) !important;
+    opacity: 1 !important;
+}
+
+#acb-hide-indicator:hover::after {
+    color: #ff7700 !important;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4) !important;
+    transform: translate(-50%, -50%) scale(1.05) !important;
+}
+
+/* 隠すインジケータータップ効果 */
+#acb-hide-indicator:active {
+    transform: scale(0.9) !important;
+}
+
+#acb-hide-indicator:active::after {
+    color: #ff6600 !important;
+    transform: translate(-50%, -50%) scale(0.95) !important;
+}
+
+/* 隠すインジケーター スライドアニメーション */
+@keyframes acb-hide-indicator-slide {
+    0%, 100% { 
+        transform: translateX(0px) scale(0.8);
+        opacity: 0.8;
+    }
+    25% { 
+        transform: translateX(-6px) scale(0.85);
+        opacity: 0.9;
+    }
+    50% { 
+        transform: translateX(-10px) scale(0.9);
+        opacity: 1;
+    }
+    75% { 
+        transform: translateX(-6px) scale(0.85);
+        opacity: 0.9;
+    }
+}
+
+#acb-hide-indicator.acb-pulse {
+    animation: acb-hide-indicator-slide 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+}
+
+/* モバイル対応の隠すインジケーター */
+@media (max-width: 768px) {
+    #acb-hide-indicator {
+        left: 2px !important; /* モバイル: バナーの左側（画面内） */
+        bottom: 45px !important; /* モバイル: 60px/2 + 15px = 45px */
+        width: 32px !important;
+        height: 32px !important;
+    }
+    
+    #acb-hide-indicator::after {
+        font-size: 20px !important;
+    }
+}
+
+/* 超小型端末対応の隠すインジケーター */
+@media (max-width: 480px) {
+    #acb-hide-indicator {
+        left: 0px !important; /* 超小型: 画面左端ギリギリ */
+        bottom: 32px !important; /* 超小型: 45px/2 + 10px = 32px */
+        width: 28px !important;
+        height: 28px !important;
+    }
+    
+    #acb-hide-indicator::after {
+        font-size: 18px !important;
+    }
+}
+
 /* アクセシビリティ：アニメーション無効化設定に対応 */
 @media (prefers-reduced-motion: reduce) {
     #acb-corner-buddy.acb-swipe-hidden {
         transition: transform 0.2s ease !important;
     }
     
-    #acb-swipe-indicator {
+    #acb-swipe-indicator, #acb-hide-indicator {
         transition: opacity 0.2s ease !important;
         transform: none !important;
     }
     
-    #acb-swipe-indicator.acb-show {
+    #acb-swipe-indicator.acb-show, #acb-hide-indicator.acb-show {
         transform: none !important;
     }
     
-    #acb-swipe-indicator:hover {
+    #acb-swipe-indicator:hover, #acb-hide-indicator:hover {
         transform: none !important;
     }
     
-    #acb-swipe-indicator:hover::after {
+    #acb-swipe-indicator:hover::after, #acb-hide-indicator:hover::after {
         transform: translate(-50%, -50%) !important;
     }
     
-    #acb-swipe-indicator:active::after {
+    #acb-swipe-indicator:active::after, #acb-hide-indicator:active::after {
         transform: translate(-50%, -50%) !important;
     }
     

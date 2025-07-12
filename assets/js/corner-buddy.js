@@ -31,6 +31,7 @@
             
             // スワイプ機能関連
             this.swipeIndicator = null;
+            this.hideIndicator = null;
             this.isSwipeHidden = false;
             this.isTransitioning = false;
             this.touchStartX = 0;
@@ -226,6 +227,7 @@
             }
 
             this.createSwipeIndicator();
+            this.createHideIndicator();
             this.setupSwipeGestures();
             this.loadSwipeState();
             
@@ -249,6 +251,25 @@
             });
 
             console.log('Amazon Corner Buddy: Swipe indicator created');
+        }
+
+        // 隠すインジケーター（左矢印）を作成
+        createHideIndicator() {
+            if (this.hideIndicator && this.hideIndicator.length > 0) {
+                return; // 既に存在する場合は作成しない
+            }
+
+            this.hideIndicator = $('<div id="acb-hide-indicator"></div>');
+            $('body').append(this.hideIndicator);
+
+            // クリックイベントを設定
+            this.hideIndicator.on('click touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.hideBanner();
+            });
+
+            console.log('Amazon Corner Buddy: Hide indicator created');
         }
 
         // スワイプジェスチャーのセットアップ
@@ -320,6 +341,11 @@
             this.removeAllAnimationClasses();
             this.hideSpeechBubble();
 
+            // 左矢印インジケーターを隠す
+            if (this.hideIndicator) {
+                this.hideIndicator.removeClass('acb-show acb-pulse');
+            }
+
             console.log('Amazon Corner Buddy: Hiding banner');
 
             // バナーを左に移動
@@ -369,6 +395,17 @@
                 this.isTransitioning = false;
                 this.element.removeClass('acb-swipe-transitioning');
                 
+                // 左矢印インジケーターを表示（バナーが表示されたので隠せることを示す）
+                if (this.hideIndicator) {
+                    this.hideIndicator.addClass('acb-show');
+                    // 3秒後にパルス効果を追加（ユーザーに気づいてもらうため）
+                    setTimeout(() => {
+                        if (this.hideIndicator && this.hideIndicator.hasClass('acb-show')) {
+                            this.hideIndicator.addClass('acb-pulse');
+                        }
+                    }, 3000);
+                }
+                
                 this.saveSwipeState();
                 console.log('Amazon Corner Buddy: Banner shown');
             }, 400);
@@ -397,6 +434,19 @@
                     }
                     
                     console.log('Amazon Corner Buddy: Restored hidden state from session');
+                } else {
+                    // バナーが表示状態の場合、左矢印インジケーターを表示
+                    if (this.hideIndicator) {
+                        this.hideIndicator.addClass('acb-show');
+                        // 5秒後にパルス効果を追加（ユーザーに気づいてもらうため）
+                        setTimeout(() => {
+                            if (this.hideIndicator && this.hideIndicator.hasClass('acb-show')) {
+                                this.hideIndicator.addClass('acb-pulse');
+                            }
+                        }, 5000);
+                    }
+                    
+                    console.log('Amazon Corner Buddy: Hide indicator shown for visible banner');
                 }
             } catch (e) {
                 console.warn('Amazon Corner Buddy: Could not load swipe state from sessionStorage');

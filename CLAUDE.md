@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## プロジェクト概要
 
-Amazon Corner Buddy は、WordPress サイトの左下角にAmazonアイコンを表示し、10秒間隔でランダムなアニメーションを実行するプラグインです。
+Amazon Corner Buddy は、WordPress サイトの左下角にAmazonアイコン（prime-day.png）を表示し、10秒間隔でランダムなアニメーションを実行するプラグインです。Ver2.0.0でPC/モバイル別サイズ対応とAmazon規約準拠の画像に更新されました。
 
 ## アーキテクチャ
 
@@ -14,6 +14,7 @@ Amazon Corner Buddy は、WordPress サイトの左下角にAmazonアイコン�
 - `admin/admin-settings.php` - 管理画面の設定UI
 - `assets/css/corner-buddy.css` - 6種類のアニメーション定義とスタイル
 - `assets/js/corner-buddy.js` - アニメーション制御ロジック
+- `assets/images/prime-day.png` - Amazon規約準拠のアイコン画像
 
 ### 設計パターン
 - **シングルトンパターン**: `Amazon_Corner_Buddy::get_instance()` でメインクラスのインスタンス管理
@@ -31,6 +32,8 @@ Amazon Corner Buddy は、WordPress サイトの左下角にAmazonアイコン�
 - プラグイン有効/無効切り替え
 - アニメーション間隔（1-60秒）
 - アイコンサイズ（20-100px）
+  - PC用サイズ（769px以上）
+  - モバイル用サイズ（768px以下）
 - 透明度（0.1-1.0）
 - 位置調整（左端・下端からの距離）
 - リンクURL設定
@@ -96,3 +99,9 @@ php -l admin/admin-settings.php
 - PHP 7.4以上
 - WordPress 5.0以上
 - jQueryライブラリ（WordPressコア依存）
+
+## バージョン情報
+- 現在のバージョン: 2.0.0
+
+## 重要な修正項目
+- メインファイルのバージョン定数とプラグインヘッダーの整合性確認が必要

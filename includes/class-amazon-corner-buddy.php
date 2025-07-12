@@ -134,6 +134,7 @@ class Amazon_Corner_Buddy {
             'link_url' => $this->get_option('link_url', 'https://amzn.to/446mmWI'),
             'speech_bubble_enabled' => $this->get_option('speech_bubble_enabled', true),
             'speech_bubble_frequency' => $this->get_option('speech_bubble_frequency', 3),
+            'swipe_hide_enabled' => $this->get_option('swipe_hide_enabled', true),
             'custom_messages' => $custom_messages
         ));
     }
@@ -279,6 +280,15 @@ class Amazon_Corner_Buddy {
             'acb_settings',
             'acb_general_section'
         );
+        
+        // スワイプ隠し機能
+        add_settings_field(
+            'swipe_hide_enabled',
+            'スワイプ隠し機能（モバイル）',
+            array($this, 'swipe_hide_enabled_field_callback'),
+            'acb_settings',
+            'acb_general_section'
+        );
     }
     
     /**
@@ -298,6 +308,7 @@ class Amazon_Corner_Buddy {
         $sanitized['link_url'] = esc_url_raw($input['link_url']);
         $sanitized['speech_bubble_enabled'] = isset($input['speech_bubble_enabled']) ? (bool) $input['speech_bubble_enabled'] : false;
         $sanitized['speech_bubble_frequency'] = max(1, min(5, intval($input['speech_bubble_frequency'])));
+        $sanitized['swipe_hide_enabled'] = isset($input['swipe_hide_enabled']) ? (bool) $input['swipe_hide_enabled'] : false;
         
         // カスタムメッセージのサニタイズ
         if (isset($input['custom_messages']) && is_array($input['custom_messages'])) {
@@ -372,6 +383,15 @@ class Amazon_Corner_Buddy {
         $link_url = $this->get_option('link_url', 'https://amzn.to/446mmWI');
         echo '<input type="url" name="acb_options[link_url]" value="' . esc_attr($link_url) . '" style="width: 400px;">';
         echo '<p class="description">アイコンクリック時のリンク先URLを設定してください。</p>';
+    }
+    
+    public function swipe_hide_enabled_field_callback() {
+        $swipe_hide_enabled = $this->get_option('swipe_hide_enabled', true);
+        echo '<label>';
+        echo '<input type="checkbox" name="acb_options[swipe_hide_enabled]" value="1" ' . checked(1, $swipe_hide_enabled, false) . '>';
+        echo ' 左スワイプでバナーを隠す機能を有効にする（モバイルのみ）';
+        echo '</label>';
+        echo '<p class="description">モバイル表示時に左スワイプでバナーを画面外に隠し、右向き矢印マークをタップで復帰できます。</p>';
     }
     
     /**

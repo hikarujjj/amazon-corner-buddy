@@ -29,6 +29,14 @@
             this.animationCount = 0;
             this.speechBubbleTimer = null;
             
+            // スワイプ機能関連
+            this.swipeIndicator = null;
+            this.isSwipeHidden = false;
+            this.isTransitioning = false;
+            this.touchStartX = 0;
+            this.touchStartY = 0;
+            this.touchStartTime = 0;
+            
             this.init();
         }
 
@@ -37,6 +45,7 @@
             $(document).ready(() => {
                 this.setupElement();
                 this.setupSpeechBubble();
+                this.setupSwipeFeature();
                 this.startAnimationTimer();
                 this.setupResizeListener();
             });
@@ -51,9 +60,34 @@
                 clearTimeout(resizeTimeout);
                 resizeTimeout = setTimeout(() => {
                     this.applySettings();
-                    console.log('Amazon Corner Buddy: Window resized, updated icon size');
+                    this.updateSwipeFeatureOnResize();
+                    console.log('Amazon Corner Buddy: Window resized, updated layout');
                 }, 150);
             });
+        }
+
+        // リサイズ時のスワイプ機能更新
+        updateSwipeFeatureOnResize() {
+            const isMobile = window.innerWidth <= 768;
+            const swipeEnabled = this.settings.swipe_hide_enabled !== false;
+
+            if (!isMobile || !swipeEnabled) {
+                // デスクトップに変更された場合、隠し状態を解除
+                if (this.isSwipeHidden) {
+                    this.isSwipeHidden = false;
+                    this.element.removeClass('acb-swipe-hidden acb-swipe-transitioning');
+                    
+                    if (this.swipeIndicator) {
+                        this.swipeIndicator.removeClass('acb-show acb-pulse');
+                    }
+                    
+                    this.saveSwipeState();
+                    console.log('Amazon Corner Buddy: Swipe hidden state reset due to desktop view');
+                }
+            } else {
+                // モバイルの場合、スワイプ機能を再初期化
+                this.setupSwipeFeature();
+            }
         }
 
         // 時間帯別挨拶メッセージ定義
@@ -172,6 +206,202 @@
             }, 100); // DOM更新後に実行
         }
 
+        // スワイプ機能のセットアップ
+        setupSwipeFeature() {
+            if (!this.element || this.element.length === 0) return;
+
+            // スワイプ機能が有効か確認（デフォルトは有効）
+            const swipeEnabled = this.settings.swipe_hide_enabled !== false;
+            if (!swipeEnabled) {
+                console.log('Amazon Corner Buddy: Swipe feature is disabled');
+                return;
+            }
+
+            // モバイル判定
+            const isMobile = window.innerWidth <= 768;
+            if (!isMobile) {
+                console.log('Amazon Corner Buddy: Swipe feature is only available on mobile');
+                return;
+            }
+
+            this.createSwipeIndicator();
+            this.setupSwipeGestures();
+            this.loadSwipeState();
+            
+            console.log('Amazon Corner Buddy: Swipe feature initialized');
+        }
+
+        // スワイプインジケーター（矢印）を作成
+        createSwipeIndicator() {
+            if (this.swipeIndicator && this.swipeIndicator.length > 0) {
+                return; // 既に存在する場合は作成しない
+            }
+
+            this.swipeIndicator = $('<div id="acb-swipe-indicator"></div>');
+            $('body').append(this.swipeIndicator);
+
+            // クリックイベントを設定
+            this.swipeIndicator.on('click touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.showBanner();
+            });
+
+            console.log('Amazon Corner Buddy: Swipe indicator created');
+        }
+
+        // スワイプジェスチャーのセットアップ
+        setupSwipeGestures() {
+            if (!this.element || this.element.length === 0) return;
+
+            // Touch Events
+            this.element.on('touchstart', (e) => this.handleTouchStart(e));
+            this.element.on('touchmove', (e) => this.handleTouchMove(e));
+            this.element.on('touchend', (e) => this.handleTouchEnd(e));
+
+            console.log('Amazon Corner Buddy: Swipe gestures setup completed');
+        }
+
+        // タッチ開始処理
+        handleTouchStart(e) {
+            if (this.isTransitioning || this.isSwipeHidden) return;
+
+            const touch = e.originalEvent.touches[0];
+            this.touchStartX = touch.clientX;
+            this.touchStartY = touch.clientY;
+            this.touchStartTime = Date.now();
+        }
+
+        // タッチ移動処理
+        handleTouchMove(e) {
+            if (this.isTransitioning || this.isSwipeHidden) return;
+            
+            // デフォルトのスクロール動作を一時的に無効化
+            e.preventDefault();
+        }
+
+        // タッチ終了処理
+        handleTouchEnd(e) {
+            if (this.isTransitioning || this.isSwipeHidden) return;
+
+            const touch = e.originalEvent.changedTouches[0];
+            const touchEndX = touch.clientX;
+            const touchEndY = touch.clientY;
+            const touchEndTime = Date.now();
+
+            const deltaX = touchEndX - this.touchStartX;
+            const deltaY = touchEndY - this.touchStartY;
+            const deltaTime = touchEndTime - this.touchStartTime;
+
+            // スワイプ判定条件
+            const minDistance = 50; // 最小スワイプ距離
+            const maxTime = 1000; // 最大スワイプ時間（1秒）
+            const maxVerticalRatio = 0.5; // 垂直移動の最大比率
+
+            // 左スワイプ判定
+            if (deltaX < -minDistance &&
+                deltaTime < maxTime &&
+                Math.abs(deltaY) < Math.abs(deltaX) * maxVerticalRatio) {
+                
+                console.log('Amazon Corner Buddy: Left swipe detected');
+                this.hideBanner();
+            }
+        }
+
+        // バナーを隠す
+        hideBanner() {
+            if (this.isTransitioning || this.isSwipeHidden) return;
+
+            this.isTransitioning = true;
+            this.element.addClass('acb-swipe-transitioning');
+
+            // アニメーション停止
+            this.removeAllAnimationClasses();
+            this.hideSpeechBubble();
+
+            console.log('Amazon Corner Buddy: Hiding banner');
+
+            // バナーを左に移動
+            this.element.addClass('acb-swipe-hidden');
+
+            // 0.4秒後に矢印インジケーターを表示
+            setTimeout(() => {
+                this.isSwipeHidden = true;
+                this.isTransitioning = false;
+                this.element.removeClass('acb-swipe-transitioning');
+                
+                if (this.swipeIndicator) {
+                    this.swipeIndicator.addClass('acb-show');
+                    // 3秒後にパルス効果を追加（ユーザーに気づいてもらうため）
+                    setTimeout(() => {
+                        if (this.swipeIndicator && this.swipeIndicator.hasClass('acb-show')) {
+                            this.swipeIndicator.addClass('acb-pulse');
+                        }
+                    }, 3000);
+                }
+
+                this.saveSwipeState();
+                console.log('Amazon Corner Buddy: Banner hidden, indicator shown');
+            }, 400);
+        }
+
+        // バナーを表示
+        showBanner() {
+            if (this.isTransitioning || !this.isSwipeHidden) return;
+
+            this.isTransitioning = true;
+            
+            console.log('Amazon Corner Buddy: Showing banner');
+
+            // インジケーターを隠す
+            if (this.swipeIndicator) {
+                this.swipeIndicator.removeClass('acb-show acb-pulse');
+            }
+
+            // バナーを右から戻す
+            this.element.removeClass('acb-swipe-hidden');
+            this.element.addClass('acb-swipe-transitioning');
+
+            // 0.4秒後に状態をリセット
+            setTimeout(() => {
+                this.isSwipeHidden = false;
+                this.isTransitioning = false;
+                this.element.removeClass('acb-swipe-transitioning');
+                
+                this.saveSwipeState();
+                console.log('Amazon Corner Buddy: Banner shown');
+            }, 400);
+        }
+
+        // スワイプ状態を保存
+        saveSwipeState() {
+            try {
+                sessionStorage.setItem('acb_swipe_hidden', this.isSwipeHidden ? '1' : '0');
+            } catch (e) {
+                console.warn('Amazon Corner Buddy: Could not save swipe state to sessionStorage');
+            }
+        }
+
+        // スワイプ状態を読み込み
+        loadSwipeState() {
+            try {
+                const savedState = sessionStorage.getItem('acb_swipe_hidden');
+                if (savedState === '1') {
+                    // 隠し状態を復元
+                    this.isSwipeHidden = true;
+                    this.element.addClass('acb-swipe-hidden');
+                    
+                    if (this.swipeIndicator) {
+                        this.swipeIndicator.addClass('acb-show acb-pulse');
+                    }
+                    
+                    console.log('Amazon Corner Buddy: Restored hidden state from session');
+                }
+            } catch (e) {
+                console.warn('Amazon Corner Buddy: Could not load swipe state from sessionStorage');
+            }
+        }
+
         setupElement() {
             this.element = $('#acb-corner-buddy');
             
@@ -257,6 +487,12 @@
                 return;
             }
 
+            // スワイプで隠されている場合はアニメーション無効
+            if (this.isSwipeHidden) {
+                console.log('Amazon Corner Buddy: Animations disabled because banner is hidden');
+                return;
+            }
+
             // アクセシビリティ設定チェック
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
                 console.log('Amazon Corner Buddy: Animations disabled due to accessibility settings');
@@ -310,6 +546,12 @@
         // ２段階吹き出し表示
         showSpeechBubble() {
             if (!this.speechBubble || !this.speechBubble.length) return;
+
+            // スワイプで隠されている場合は吹き出し無効
+            if (this.isSwipeHidden) {
+                console.log('Amazon Corner Buddy: Speech bubble disabled because banner is hidden');
+                return;
+            }
 
             // アクセシビリティ設定チェック
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -405,6 +647,16 @@
             this.showSpeechBubble();
         }
 
+        // 手動でバナー隠し（デバッグ用）
+        triggerHideBanner() {
+            this.hideBanner();
+        }
+
+        // 手動でバナー表示（デバッグ用）
+        triggerShowBanner() {
+            this.showBanner();
+        }
+
         // アニメーション停止
         stopAnimations() {
             if (this.animationTimer) {
@@ -485,7 +737,13 @@
 
     // デバッグ用コンソールコマンド
     if (typeof console !== 'undefined') {
-        console.log('Amazon Corner Buddy loaded! Use AmazonCornerBuddy.triggerRandomAnimation() to test animations.');
+        console.log('Amazon Corner Buddy loaded! Available commands:');
+        console.log('- AmazonCornerBuddy.triggerRandomAnimation() : ランダムアニメーション実行');
+        console.log('- AmazonCornerBuddy.triggerSpeechBubble() : 吹き出し表示');
+        console.log('- AmazonCornerBuddy.triggerHideBanner() : バナー隠し');
+        console.log('- AmazonCornerBuddy.triggerShowBanner() : バナー表示');
+        console.log('- AmazonCornerBuddy.stopAnimations() : アニメーション停止');
+        console.log('- AmazonCornerBuddy.resumeAnimations() : アニメーション再開');
     }
 
 })(jQuery);

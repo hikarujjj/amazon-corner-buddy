@@ -26,6 +26,7 @@ if (isset($_POST['submit']) && check_admin_referer('acb_settings_nonce')) {
         'link_url' => esc_url_raw($_POST['acb_options']['link_url']),
         'speech_bubble_enabled' => isset($_POST['acb_options']['speech_bubble_enabled']) ? true : false,
         'speech_bubble_frequency' => max(1, min(5, intval($_POST['acb_options']['speech_bubble_frequency']))),
+        'swipe_hide_enabled' => isset($_POST['acb_options']['swipe_hide_enabled']) ? true : false,
         // カスタムメッセージ設定（25文字制限）
         'custom_messages' => array(
             'morning' => array(
@@ -136,6 +137,7 @@ $border_radius = isset($options['border_radius']) ? $options['border_radius'] : 
 $link_url = isset($options['link_url']) ? $options['link_url'] : 'https://amzn.to/446mmWI';
 $speech_bubble_enabled = isset($options['speech_bubble_enabled']) ? $options['speech_bubble_enabled'] : true;
 $speech_bubble_frequency = isset($options['speech_bubble_frequency']) ? $options['speech_bubble_frequency'] : 3;
+$swipe_hide_enabled = isset($options['swipe_hide_enabled']) ? $options['swipe_hide_enabled'] : true;
 
 // カスタムメッセージのデフォルト値
 $default_messages = array(
@@ -223,9 +225,9 @@ $custom_messages = isset($options['custom_messages']) ? $options['custom_message
                                        name="acb_options[icon_size]" 
                                        value="<?php echo esc_attr($icon_size); ?>" 
                                        min="20" 
-                                       max="100" 
+                                       max="150" 
                                        style="width: 80px;"> px
-                                <p class="description">モバイル端末（768px以下）でのアイコンサイズを設定します（20-100px）。</p>
+                                <p class="description">モバイル端末（768px以下）でのアイコンサイズを設定します（20-150px）。</p>
                             </td>
                         </tr>
                         
@@ -240,9 +242,9 @@ $custom_messages = isset($options['custom_messages']) ? $options['custom_message
                                        name="acb_options[icon_size_pc]" 
                                        value="<?php echo esc_attr($icon_size_pc); ?>" 
                                        min="30" 
-                                       max="150" 
+                                       max="200" 
                                        style="width: 80px;"> px
-                                <p class="description">PC画面（769px以上）でのアイコンサイズを設定します（30-150px）。</p>
+                                <p class="description">PC画面（769px以上）でのアイコンサイズを設定します（30-200px）。</p>
                             </td>
                         </tr>
                         
@@ -318,6 +320,34 @@ $custom_messages = isset($options['custom_messages']) ? $options['custom_message
                                        value="<?php echo esc_attr($link_url); ?>" 
                                        style="width: 400px;">
                                 <p class="description">アイコンクリック時のリンク先URLを設定します。</p>
+                            </td>
+                        </tr>
+                        
+                        <!-- スワイプ隠し機能設定 -->
+                        <tr>
+                            <th scope="row" colspan="2">
+                                <h3 style="margin: 30px 0 10px 0; color: #d63384;">📱 モバイル機能設定</h3>
+                            </th>
+                        </tr>
+                        
+                        <!-- スワイプ隠し機能 -->
+                        <tr>
+                            <th scope="row">
+                                <label for="acb_swipe_hide_enabled">スワイプ隠し機能</label>
+                            </th>
+                            <td>
+                                <input type="checkbox" 
+                                       id="acb_swipe_hide_enabled" 
+                                       name="acb_options[swipe_hide_enabled]" 
+                                       value="1" 
+                                       <?php checked(1, $swipe_hide_enabled); ?>>
+                                <label for="acb_swipe_hide_enabled">左スワイプでバナーを隠す機能を有効にする</label>
+                                <p class="description">
+                                    <strong>📱 モバイル専用機能:</strong> 画面幅768px以下でのみ動作します。<br>
+                                    <strong>使い方:</strong> バナーを左にスワイプすると画面外に隠れ、右向き矢印マークが表示されます。<br>
+                                    <strong>復帰方法:</strong> 矢印マークをタップすると元の位置に戻ります。<br>
+                                    <strong>状態保持:</strong> ページを移動しても隠し状態が維持されます（セッション中）。
+                                </p>
                             </td>
                         </tr>
                         

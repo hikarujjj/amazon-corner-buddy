@@ -19,6 +19,19 @@
     -ms-user-select: none !important;
     transition: all 0.3s ease !important;
     cursor: pointer !important;
+    /* バナー形式 (4:3 アスペクト比) デフォルトサイズ */
+    width: 120px !important;
+    height: 90px !important;
+}
+
+/* スワイプ隠し機能 */
+#acb-corner-buddy.acb-swipe-hidden {
+    transform: translateX(-100%) !important;
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+#acb-corner-buddy.acb-swipe-transitioning {
+    pointer-events: none !important;
 }
 
 /* ホバー効果 */
@@ -134,6 +147,9 @@
     #acb-corner-buddy {
         bottom: 15px !important;
         left: 15px !important;
+        /* モバイル用バナーサイズ (4:3 アスペクト比) */
+        width: 80px !important;
+        height: 60px !important;
     }
     
     /* モバイルではアニメーションを少し控えめに */
@@ -167,6 +183,9 @@
     #acb-corner-buddy {
         bottom: 10px !important;
         left: 10px !important;
+        /* 超小型端末用バナーサイズ (4:3 アスペクト比) */
+        width: 60px !important;
+        height: 45px !important;
     }
 }
 
@@ -314,8 +333,117 @@
     }
 }
 
+/* スワイプインジケーター（矢印マーク） */
+#acb-swipe-indicator {
+    position: fixed !important;
+    left: 3px !important;
+    bottom: 65px !important; /* バナー中心高さ（PC: 90px/2 + 20px = 65px） */
+    width: 24px !important;
+    height: 24px !important;
+    background: linear-gradient(45deg, #ff9500, #ff7700) !important;
+    border-radius: 50% !important;
+    opacity: 0 !important;
+    transform: scale(0.8) !important;
+    transition: all 0.3s ease !important;
+    cursor: pointer !important;
+    z-index: 10000 !important;
+    box-shadow: 0 2px 8px rgba(255, 149, 0, 0.3) !important;
+    display: none !important;
+}
+
+/* 矢印マークの中の三角矢印 */
+#acb-swipe-indicator::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-40%, -50%) !important;
+    width: 0 !important;
+    height: 0 !important;
+    border: 5px solid transparent !important;
+    border-left: 8px solid white !important;
+}
+
+/* インジケーター表示状態 */
+#acb-swipe-indicator.acb-show {
+    opacity: 0.9 !important;
+    transform: scale(1) !important;
+    display: block !important;
+}
+
+/* インジケーターホバー効果 */
+#acb-swipe-indicator:hover {
+    transform: scale(1.1) !important;
+    opacity: 1 !important;
+    box-shadow: 0 4px 12px rgba(255, 149, 0, 0.4) !important;
+}
+
+/* インジケータータップ効果 */
+#acb-swipe-indicator:active {
+    transform: scale(0.9) !important;
+}
+
+/* インジケーターパルス効果 */
+@keyframes acb-indicator-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.05); opacity: 1; }
+}
+
+#acb-swipe-indicator.acb-pulse {
+    animation: acb-indicator-pulse 1.5s ease-in-out infinite !important;
+}
+
+/* モバイル対応のインジケーター */
+@media (max-width: 768px) {
+    #acb-swipe-indicator {
+        bottom: 45px !important; /* モバイル: 60px/2 + 15px = 45px */
+        width: 20px !important;
+        height: 20px !important;
+    }
+    
+    #acb-swipe-indicator::after {
+        border: 4px solid transparent !important;
+        border-left: 6px solid white !important;
+    }
+}
+
+/* 超小型端末対応のインジケーター */
+@media (max-width: 480px) {
+    #acb-swipe-indicator {
+        bottom: 32px !important; /* 超小型: 45px/2 + 10px = 32px */
+        width: 18px !important;
+        height: 18px !important;
+    }
+    
+    #acb-swipe-indicator::after {
+        border: 3px solid transparent !important;
+        border-left: 5px solid white !important;
+    }
+}
+
 /* アクセシビリティ：アニメーション無効化設定に対応 */
 @media (prefers-reduced-motion: reduce) {
+    #acb-corner-buddy.acb-swipe-hidden {
+        transition: transform 0.2s ease !important;
+    }
+    
+    #acb-swipe-indicator {
+        transition: opacity 0.2s ease !important;
+        transform: none !important;
+    }
+    
+    #acb-swipe-indicator.acb-show {
+        transform: none !important;
+    }
+    
+    #acb-swipe-indicator:hover {
+        transform: none !important;
+    }
+    
+    .acb-pulse {
+        animation: none !important;
+    }
+    
     #acb-speech-bubble {
         transition: opacity 0.3s ease !important;
         transform: none !important;
@@ -327,9 +455,5 @@
     
     #acb-speech-bubble.acb-fade-out {
         transform: none !important;
-    }
-    
-    .acb-pulse {
-        animation: none !important;
     }
 }

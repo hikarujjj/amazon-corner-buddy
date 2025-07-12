@@ -19,9 +19,7 @@
     -ms-user-select: none !important;
     transition: all 0.3s ease !important;
     cursor: pointer !important;
-    /* バナー形式 (4:3 アスペクト比) デフォルトサイズ */
-    width: 120px !important;
-    height: 90px !important;
+    /* サイズはJavaScriptで動的に設定されるため、!importantを削除 */
 }
 
 /* スワイプ隠し機能 */
@@ -145,11 +143,9 @@
 /* モバイル対応 */
 @media (max-width: 768px) {
     #acb-corner-buddy {
+        /* ポジションのみCSS固定、サイズはJavaScriptで動的設定 */
         bottom: 15px !important;
         left: 15px !important;
-        /* モバイル用バナーサイズ (4:3 アスペクト比) */
-        width: 80px !important;
-        height: 60px !important;
     }
     
     /* モバイルではアニメーションを少し控えめに */
@@ -181,11 +177,9 @@
 /* 超小さいスクリーン用 */
 @media (max-width: 480px) {
     #acb-corner-buddy {
+        /* ポジションのみCSS固定、サイズはJavaScriptで動的設定 */
         bottom: 10px !important;
         left: 10px !important;
-        /* 超小型端末用バナーサイズ (4:3 アスペクト比) */
-        width: 60px !important;
-        height: 45px !important;
     }
 }
 

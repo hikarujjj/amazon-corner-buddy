@@ -17,8 +17,9 @@ if (isset($_POST['submit']) && check_admin_referer('acb_settings_nonce')) {
     $new_options = array(
         'enabled' => isset($_POST['acb_options']['enabled']) ? true : false,
         'animation_interval' => max(1, min(60, intval($_POST['acb_options']['animation_interval']))),
-        'icon_size' => max(20, min(100, intval($_POST['acb_options']['icon_size']))),
-        'icon_size_pc' => max(30, min(150, intval($_POST['acb_options']['icon_size_pc']))),
+        'icon_size_pc' => max(60, min(200, intval($_POST['acb_options']['icon_size_pc']))),
+        'icon_size_mobile' => max(40, min(120, intval($_POST['acb_options']['icon_size_mobile']))),
+        'icon_size_mobile_small' => max(30, min(150, intval($_POST['acb_options']['icon_size_mobile_small']))),
         'opacity' => max(0.1, min(1.0, floatval($_POST['acb_options']['opacity']))),
         'position_bottom' => max(0, min(500, intval($_POST['acb_options']['position_bottom']))),
         'position_left' => max(0, min(500, intval($_POST['acb_options']['position_left']))),
@@ -128,8 +129,9 @@ if (isset($_POST['submit']) && check_admin_referer('acb_settings_nonce')) {
 $options = get_option('acb_options', array());
 $enabled = isset($options['enabled']) ? $options['enabled'] : true;
 $animation_interval = isset($options['animation_interval']) ? $options['animation_interval'] : 10;
-$icon_size = isset($options['icon_size']) ? $options['icon_size'] : 48;
-$icon_size_pc = isset($options['icon_size_pc']) ? $options['icon_size_pc'] : 64;
+$icon_size_pc = isset($options['icon_size_pc']) ? $options['icon_size_pc'] : 120;
+$icon_size_mobile = isset($options['icon_size_mobile']) ? $options['icon_size_mobile'] : 80;
+$icon_size_mobile_small = isset($options['icon_size_mobile_small']) ? $options['icon_size_mobile_small'] : 60;
 $opacity = isset($options['opacity']) ? $options['opacity'] : 0.8;
 $position_bottom = isset($options['position_bottom']) ? $options['position_bottom'] : 20;
 $position_left = isset($options['position_left']) ? $options['position_left'] : 20;
@@ -217,17 +219,34 @@ $custom_messages = isset($options['custom_messages']) ? $options['custom_message
                         <!-- モバイル表示サイズ -->
                         <tr>
                             <th scope="row">
-                                <label for="acb_icon_size">📱 モバイル表示サイズ</label>
+                                <label for="acb_icon_size_mobile">📱 モバイル表示サイズ</label>
                             </th>
                             <td>
                                 <input type="number" 
-                                       id="acb_icon_size" 
-                                       name="acb_options[icon_size]" 
-                                       value="<?php echo esc_attr($icon_size); ?>" 
-                                       min="20" 
+                                       id="acb_icon_size_mobile" 
+                                       name="acb_options[icon_size_mobile]" 
+                                       value="<?php echo esc_attr($icon_size_mobile); ?>" 
+                                       min="40" 
                                        max="150" 
                                        style="width: 80px;"> px
-                                <p class="description">モバイル端末（768px以下）でのアイコンサイズを設定します（20-150px）。</p>
+                                <p class="description">モバイル端末（768px以下）でのバナー幅を設定します（40-150px）。高さは自動で4:3比率になります。</p>
+                            </td>
+                        </tr>
+                        
+                        <!-- 超小型端末表示サイズ -->
+                        <tr>
+                            <th scope="row">
+                                <label for="acb_icon_size_mobile_small">📱 超小型端末表示サイズ</label>
+                            </th>
+                            <td>
+                                <input type="number" 
+                                       id="acb_icon_size_mobile_small" 
+                                       name="acb_options[icon_size_mobile_small]" 
+                                       value="<?php echo esc_attr($icon_size_mobile_small); ?>" 
+                                       min="30" 
+                                       max="150" 
+                                       style="width: 80px;"> px
+                                <p class="description">超小型端末（480px以下）でのバナー幅を設定します（30-150px）。高さは自動で4:3比率になります。</p>
                             </td>
                         </tr>
                         
@@ -241,10 +260,10 @@ $custom_messages = isset($options['custom_messages']) ? $options['custom_message
                                        id="acb_icon_size_pc" 
                                        name="acb_options[icon_size_pc]" 
                                        value="<?php echo esc_attr($icon_size_pc); ?>" 
-                                       min="30" 
+                                       min="60" 
                                        max="200" 
                                        style="width: 80px;"> px
-                                <p class="description">PC画面（769px以上）でのアイコンサイズを設定します（30-200px）。</p>
+                                <p class="description">PC画面（769px以上）でのバナー幅を設定します（60-200px）。高さは自動で4:3比率になります。</p>
                             </td>
                         </tr>
                         
@@ -647,7 +666,7 @@ $custom_messages = isset($options['custom_messages']) ? $options['custom_message
     transition: all 0.3s ease;
 }
 
-#acb_icon_size, #acb_opacity, #acb_position_left, #acb_position_bottom {
+#acb_icon_size_mobile, #acb_icon_size_mobile_small, #acb_icon_size_pc, #acb_opacity, #acb_position_left, #acb_position_bottom {
     transition: all 0.3s ease;
 }
 
@@ -661,27 +680,28 @@ $custom_messages = isset($options['custom_messages']) ? $options['custom_message
 jQuery(document).ready(function($) {
     // ライブプレビュー機能
     function updatePreview() {
-        var iconSize = $('#acb_icon_size').val();
+        var iconSizeMobile = $('#acb_icon_size_mobile').val();
+        var iconSizeMobileSmall = $('#acb_icon_size_mobile_small').val();
         var iconSizePc = $('#acb_icon_size_pc').val();
         var opacity = $('#acb_opacity').val();
         var positionLeft = $('#acb_position_left').val();
         var positionBottom = $('#acb_position_bottom').val();
         var borderRadius = $('#acb_border_radius').val();
         
-        // PCプレビュー更新
+        // PCプレビュー更新（4:3比率）
         $('.acb-admin-preview-pc').css({
             'width': iconSizePc + 'px',
-            'height': iconSizePc + 'px',
+            'height': Math.round(iconSizePc * 0.75) + 'px',
             'opacity': opacity,
             'left': positionLeft + 'px',
             'bottom': positionBottom + 'px',
             'border-radius': borderRadius + 'px'
         });
         
-        // モバイルプレビュー更新
+        // モバイルプレビュー更新（4:3比率）
         $('.acb-admin-preview-mobile').css({
-            'width': iconSize + 'px',
-            'height': iconSize + 'px',
+            'width': iconSizeMobile + 'px',
+            'height': Math.round(iconSizeMobile * 0.75) + 'px',
             'opacity': opacity,
             'left': positionLeft + 'px',
             'bottom': positionBottom + 'px',
@@ -749,7 +769,7 @@ jQuery(document).ready(function($) {
     }
     
     // 設定値変更時にリアルタイムでプレビュー更新
-    $('#acb_icon_size, #acb_icon_size_pc, #acb_opacity, #acb_position_left, #acb_position_bottom, #acb_border_radius').on('input', updatePreview);
+    $('#acb_icon_size_mobile, #acb_icon_size_mobile_small, #acb_icon_size_pc, #acb_opacity, #acb_position_left, #acb_position_bottom, #acb_border_radius').on('input', updatePreview);
     
     // 文字数カウンター初期化
     setupCharCounters();

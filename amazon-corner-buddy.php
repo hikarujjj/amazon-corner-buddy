@@ -3,7 +3,7 @@
  * Plugin Name: Amazon Corner Buddy
  * Plugin URI: https://github.com/amazon-corner-buddy
  * Description: ページの左下角でAmazonアイコンが密かにアニメーションする可愛いプラグイン
- * Version: 2.1.0
+ * Version: 2.2.0
  * Author: buchi
  * Author URI: https://github.com/amazon-corner-buddy
  * License: GPL v2 or later
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 }
 
 // プラグイン定数を定義
-define('ACB_VERSION', '2.1.0');
+define('ACB_VERSION', '2.2.0');
 define('ACB_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('ACB_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('ACB_PLUGIN_FILE', __FILE__);
@@ -39,15 +39,52 @@ function acb_activation() {
     $default_options = array(
         'enabled' => true,
         'animation_interval' => 10,
-        'icon_size' => 48,
+        'icon_size_pc' => 120,
+        'icon_size_mobile' => 80,
+        'icon_size_mobile_small' => 60,
         'opacity' => 0.8,
         'position_bottom' => 20,
         'position_left' => 20,
-        'link_url' => 'https://amzn.to/446mmWI'
+        'border_radius' => 12,
+        'link_url' => 'https://amzn.to/446mmWI',
+        'speech_bubble_enabled' => true,
+        'speech_bubble_frequency' => 3,
+        'swipe_hide_enabled' => true
     );
     
-    if (!get_option('acb_options')) {
+    $existing_options = get_option('acb_options', array());
+    
+    if (empty($existing_options)) {
+        // 新規インストール：デフォルト設定を保存
         add_option('acb_options', $default_options);
+    } else {
+        // 既存インストール：設定移行処理
+        $updated = false;
+        
+        // 古いicon_sizeフィールドがあり、新しいフィールドがない場合は移行
+        if (isset($existing_options['icon_size']) && !isset($existing_options['icon_size_mobile'])) {
+            $existing_options['icon_size_mobile'] = $existing_options['icon_size'];
+            $updated = true;
+        }
+        
+        // 新しいフィールドにデフォルト値を設定（存在しない場合）
+        foreach ($default_options as $key => $value) {
+            if (!isset($existing_options[$key])) {
+                $existing_options[$key] = $value;
+                $updated = true;
+            }
+        }
+        
+        // 古いフィールドを削除
+        if (isset($existing_options['icon_size'])) {
+            unset($existing_options['icon_size']);
+            $updated = true;
+        }
+        
+        // 更新が必要な場合のみ保存
+        if ($updated) {
+            update_option('acb_options', $existing_options);
+        }
     }
 }
 register_activation_hook(__FILE__, 'acb_activation');

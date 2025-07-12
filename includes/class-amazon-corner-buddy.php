@@ -124,8 +124,9 @@ class Amazon_Corner_Buddy {
         // JavaScriptに設定値を渡す
         wp_localize_script('acb-frontend-script', 'acb_vars', array(
             'animation_interval' => $this->get_option('animation_interval', 10) * 1000, // ミリ秒に変換
-            'icon_size' => $this->get_option('icon_size', 48),
-            'icon_size_pc' => $this->get_option('icon_size_pc', 64),
+            'icon_size_pc' => $this->get_option('icon_size_pc', 120),
+            'icon_size_mobile' => $this->get_option('icon_size_mobile', 80),
+            'icon_size_mobile_small' => $this->get_option('icon_size_mobile_small', 60),
             'opacity' => $this->get_option('opacity', 0.8),
             'position_bottom' => $this->get_option('position_bottom', 20),
             'position_left' => $this->get_option('position_left', 20),
@@ -164,7 +165,18 @@ class Amazon_Corner_Buddy {
             return;
         }
         
-        $icon_size = $this->get_option('icon_size', 48);
+        // レスポンシブ対応：画面サイズに応じて適切なサイズを取得
+        $screen_width = isset($_SERVER['HTTP_USER_AGENT']) && preg_match('/Mobile|Android|iPhone|iPad/', $_SERVER['HTTP_USER_AGENT']) ? 768 : 1024;
+        
+        if ($screen_width <= 480) {
+            $icon_width = $this->get_option('icon_size_mobile_small', 60);
+        } elseif ($screen_width <= 768) {
+            $icon_width = $this->get_option('icon_size_mobile', 80);
+        } else {
+            $icon_width = $this->get_option('icon_size_pc', 120);
+        }
+        
+        $icon_height = round($icon_width * 0.75); // 4:3比率
         $opacity = $this->get_option('opacity', 0.8);
         $bottom = $this->get_option('position_bottom', 20);
         $left = $this->get_option('position_left', 20);
@@ -176,8 +188,8 @@ class Amazon_Corner_Buddy {
             position: fixed;
             bottom: ' . intval($bottom) . 'px;
             left: ' . intval($left) . 'px;
-            width: ' . intval($icon_size) . 'px;
-            height: ' . intval($icon_size) . 'px;
+            width: ' . intval($icon_width) . 'px;
+            height: ' . intval($icon_height) . 'px;
             opacity: ' . floatval($opacity) . ';
             border-radius: ' . intval($border_radius) . 'px;
             z-index: 9999;
@@ -245,11 +257,29 @@ class Amazon_Corner_Buddy {
             'acb_general_section'
         );
         
-        // アイコンサイズ
+        // PC用バナーサイズ
         add_settings_field(
-            'icon_size',
-            'アイコンサイズ（px）',
-            array($this, 'icon_size_field_callback'),
+            'icon_size_pc',
+            'PC用バナーサイズ（幅px）',
+            array($this, 'icon_size_pc_field_callback'),
+            'acb_settings',
+            'acb_general_section'
+        );
+        
+        // モバイル用バナーサイズ
+        add_settings_field(
+            'icon_size_mobile',
+            'モバイル用バナーサイズ（幅px）',
+            array($this, 'icon_size_mobile_field_callback'),
+            'acb_settings',
+            'acb_general_section'
+        );
+        
+        // 超小型端末用バナーサイズ
+        add_settings_field(
+            'icon_size_mobile_small',
+            '超小型端末用バナーサイズ（幅px）',
+            array($this, 'icon_size_mobile_small_field_callback'),
             'acb_settings',
             'acb_general_section'
         );
@@ -299,8 +329,9 @@ class Amazon_Corner_Buddy {
         
         $sanitized['enabled'] = isset($input['enabled']) ? (bool) $input['enabled'] : false;
         $sanitized['animation_interval'] = max(1, min(60, intval($input['animation_interval'])));
-        $sanitized['icon_size'] = max(20, min(100, intval($input['icon_size'])));
-        $sanitized['icon_size_pc'] = max(30, min(150, intval($input['icon_size_pc'])));
+        $sanitized['icon_size_pc'] = max(60, min(200, intval($input['icon_size_pc'])));
+        $sanitized['icon_size_mobile'] = max(40, min(120, intval($input['icon_size_mobile'])));
+        $sanitized['icon_size_mobile_small'] = max(30, min(150, intval($input['icon_size_mobile_small'])));
         $sanitized['opacity'] = max(0.1, min(1.0, floatval($input['opacity'])));
         $sanitized['position_bottom'] = max(0, min(500, intval($input['position_bottom'])));
         $sanitized['position_left'] = max(0, min(500, intval($input['position_left'])));
@@ -361,10 +392,22 @@ class Amazon_Corner_Buddy {
         echo '<p class="description">1-60秒の間で設定してください。</p>';
     }
     
-    public function icon_size_field_callback() {
-        $size = $this->get_option('icon_size', 48);
-        echo '<input type="number" name="acb_options[icon_size]" value="' . esc_attr($size) . '" min="20" max="100">';
-        echo '<p class="description">20-100pxの間で設定してください。</p>';
+    public function icon_size_pc_field_callback() {
+        $size = $this->get_option('icon_size_pc', 120);
+        echo '<input type="number" name="acb_options[icon_size_pc]" value="' . esc_attr($size) . '" min="60" max="200">';
+        echo '<p class="description">PC用バナーの幅（60-200px）。高さは自動で4:3比率になります。</p>';
+    }
+    
+    public function icon_size_mobile_field_callback() {
+        $size = $this->get_option('icon_size_mobile', 80);
+        echo '<input type="number" name="acb_options[icon_size_mobile]" value="' . esc_attr($size) . '" min="40" max="120">';
+        echo '<p class="description">モバイル用バナーの幅（40-120px）。高さは自動で4:3比率になります。</p>';
+    }
+    
+    public function icon_size_mobile_small_field_callback() {
+        $size = $this->get_option('icon_size_mobile_small', 60);
+        echo '<input type="number" name="acb_options[icon_size_mobile_small]" value="' . esc_attr($size) . '" min="30" max="80">';
+        echo '<p class="description">超小型端末用バナーの幅（30-80px）。高さは自動で4:3比率になります。</p>';
     }
     
     public function opacity_field_callback() {
